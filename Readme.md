@@ -17,7 +17,15 @@ The repository contains:
 
 ### Single player
 
-![single player](https://github.com/louis2889184/TetrisBattle/blob/master/imgs/demo_single.gif")
+![single player](imgs/demo_single.gif)
+
+<table align="center", width="600px">
+    <tbody> 
+    <tr>
+        <td width="100%" align="center"> <img src="https://github.com/louis2889184/TetrisBattle/blob/master/imgs/demo_single.gif"> </td>
+    </tr>
+    </tbody>
+</table>
 
 
 

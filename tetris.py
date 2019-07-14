@@ -415,6 +415,49 @@ def clear_garbage(grid):
                 grid[x].pop(y)
                 grid[x] = [0] + grid[x]
 
+
+def get_infos(board):
+    # board is equal to grid
+
+    # borrow from https://github.com/scuriosity/machine-learning-tetris/blob/master/tetris.py
+    # This function will calculate different parameters of the current board
+
+    # Initialize some stuff
+    heights = [0] * len(board)
+    diffs = [0] * (len(board) - 1)
+    holes = 0
+    diff_sum = 0
+
+    # Calculate the maximum height of each column
+    for i in range(0, len(board)):  # Select a column
+        for j in range(0, len(board[0])):  # Search down starting from the top of the board
+            if int(board[i][j]) > 0:  # Is the cell occupied?
+                heights[i] = len(board[0]) - j  # Store the height value
+                break
+
+    # Calculate the difference in heights
+    for i in range(0, len(diffs)):
+        diffs[i] = heights[i + 1] - heights[i]
+
+    # Calculate the maximum height
+    max_height = max(heights)
+
+    # Count the number of holes
+    for i in range(0, len(board)):
+        occupied = 0  # Set the 'Occupied' flag to 0 for each new column
+        for j in range(0, len(board[0])):  # Scan from top to bottom
+            if int(board[i][j]) > 0:
+                occupied = 1  # If a block is found, set the 'Occupied' flag to 1
+            if int(board[i][j]) == 0 and occupied == 1:
+                holes += 1  # If a hole is found, add one to the count
+
+    height_sum = sum(heights)
+
+    for i in diffs:
+        diff_sum += abs(i)
+
+    return height_sum, diff_sum, max_height, holes
+
 class Piece(object):
     def __init__(self, _type, possible_shapes):
 
@@ -583,7 +626,7 @@ class Tetris(object):
         self.KO = 0 
 
         self.attacked = 0
-        self.is_fallen = 0
+        self._is_fallen = 0
 
         self.px = 4
         self.py = -2
@@ -599,6 +642,7 @@ class Tetris(object):
         self.pressedLeft = False
         self.pressedDown = False
 
+        self.LAST_ROTATE_TIME = t.time()
         self.LAST_MOVE_SHIFT_TIME = t.time()
         self.LAST_MOVE_DOWN_TIME = t.time()
         self.LAST_COMBO_DRAW_TIME = t.time()
@@ -640,7 +684,7 @@ class Tetris(object):
         self.KO = 0 
 
         self.attacked = 0
-        self.is_fallen = 0
+        self._is_fallen = 0
 
         self.px = 4
         self.py = -2
@@ -656,6 +700,8 @@ class Tetris(object):
         self.pressedLeft = False
         self.pressedDown = False
 
+
+        self.LAST_ROTATE_TIME = t.time()
         self.LAST_MOVE_SHIFT_TIME = t.time()
         self.LAST_MOVE_DOWN_TIME = t.time()
         self.LAST_COMBO_DRAW_TIME = t.time()
@@ -673,6 +719,21 @@ class Tetris(object):
         self.combo_counter = 0
 
         self.natural_down_counter = 0
+
+
+    @property
+    def is_fallen(self):
+        return self._is_fallen
+    
+
+    def get_grid(self):
+        excess = len(self.grid[0]) - GRID_DEPTH
+        return_grids = np.zeros(shape=(GRID_WIDTH, GRID_DEPTH), dtype=np.float32)
+
+        for i in range(len(self.grid)):
+            return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+
+        return return_grids
 
     def reset_pos(self):
         self.px = 4
@@ -701,22 +762,22 @@ class Tetris(object):
 
     def trigger(self, evt):
         if evt.type == pygame.KEYDOWN:
-            if evt.key == self.player.rotate_right_key(): # rotating
-
+            if evt.key == self.player.rotate_right and t.time() - self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=1)
+                self.LAST_ROTATE_TIME = t.time()
 
-            if evt.key == self.player.rotate_left_key(): # rotating
-
+            if evt.key == self.player.rotate_left and t.time() - self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=-1)
+                self.LAST_ROTATE_TIME = t.time()
 
-            if evt.key == self.player.drop_key(): # harddrop
+            if evt.key == self.player.drop: # harddrop
                 y = hardDrop(self.grid, self.block, self.px, self.py) # parameters
                 # self.block.move_down(y)
                 self.py += y
                 # self.stopcounter = COLLIDE_DOWN_COUNT
                 self.LAST_FALL_DOWN_TIME = -FALL_DOWN_FREQ
 
-            if evt.key == self.player.hold_key(): #holding 
+            if evt.key == self.player.hold: #holding 
 
                 if not self.isholded:
 
@@ -725,24 +786,24 @@ class Tetris(object):
                     self.reset_pos()
                     self.isholded = 1
 
-            if evt.key == self.player.right_key():
+            if evt.key == self.player.right:
                 self.pressedRight = True
 
-            if evt.key == self.player.left_key():
+            if evt.key == self.player.left:
                 self.pressedLeft = True
 
-            if evt.key == self.player.down_key():
+            if evt.key == self.player.down:
                 self.pressedDown = True
 
         if evt.type == pygame.KEYUP:
 
-            if evt.key == self.player.right_key():
+            if evt.key == self.player.right:
                 self.pressedRight = False
 
-            if evt.key == self.player.left_key():
+            if evt.key == self.player.left:
                 self.pressedLeft = False
 
-            if evt.key == self.player.down_key():
+            if evt.key == self.player.down:
                 self.pressedDown = False
 
     # move function
@@ -775,13 +836,14 @@ class Tetris(object):
         if collideDown(self.grid, self.block, self.px, self.py) == True:
             # self.stopcounter += 1
             if t.time() - self.LAST_FALL_DOWN_TIME >= FALL_DOWN_FREQ:
-                self.is_fallen = 1
+                self._is_fallen = 1
                 block_in_grid(self.grid, self.block, self.px, self.py)
                 # print("fallen")
 
                 return True
 
         else:
+            self._is_fallen = 0
             # self.stopcounter = 0
             self.LAST_FALL_DOWN_TIME = t.time()
 
@@ -1207,36 +1269,47 @@ class for player
 class Player(object):
     def __init__(self, info_dict):
 
-        self.id = info_dict.get("id")
+        self._id = info_dict.get("id")
 
-        self.drop = info_dict.get("drop")
-        self.hold = info_dict.get("hold")
-        self.rotate_right = info_dict.get("rotate_right")
-        self.rotate_left = info_dict.get("rotate_left")
-        self.down = info_dict.get("down")
-        self.left = info_dict.get("left")
-        self.right = info_dict.get("right")
+        self._drop = info_dict.get("drop")
+        self._hold = info_dict.get("hold")
+        self._rotate_right = info_dict.get("rotate_right")
+        self._rotate_left = info_dict.get("rotate_left")
+        self._down = info_dict.get("down")
+        self._left = info_dict.get("left")
+        self._right = info_dict.get("right")
 
-    def drop_key(self):
-        return self.drop
+    @property
+    def id(self):
+        return self._id
 
-    def hold_key(self):
-        return self.hold
+    @property
+    def drop(self):
+        return self._drop
 
-    def rotate_right_key(self):
-        return self.rotate_right
+    @property
+    def hold(self):
+        return self._hold
 
-    def rotate_left_key(self):
-        return self.rotate_left
+    @property
+    def rotate_right(self):
+        return self._rotate_right
 
-    def down_key(self):
-        return self.down
+    @property
+    def rotate_left(self):
+        return self._rotate_left
 
-    def left_key(self):
-        return self.left
+    @property
+    def down(self):
+        return self._down
 
-    def right_key(self):
-        return self.right
+    @property
+    def left(self):
+        return self._left
+
+    @property
+    def right(self):
+        return self._right
 
 '''
 
@@ -1827,7 +1900,13 @@ class ComEvt:
 
 class TetrisSingleInterface:
 
-    metadata = {'render.modes': ["human", "rgb_array"]}
+    metadata = {'render.modes': ['human', 'rgb_array'], 
+                'obs_type': ['image', 'grid']}
+
+    #######################################
+    # observation type: 
+    # "image" => screen shot of the game 
+    # "grid"  => the row data array of the game
 
     def __init__(self, gridchoice="none", obs_type="image", mode="rgb_array"):
 
@@ -1909,8 +1988,13 @@ class TetrisSingleInterface:
         ob = np.transpose(ob, (1, 0, 2))
         return ob
 
+    def get_seen_grid(self):
+        return self.tetris_1.get_grid()
+
     def get_obs(self):
-        if self._obs_type == "image":
+        if self._obs_type == "grid":
+            return self.get_seen_grid()
+        elif self._obs_type == "image":
             img = self.get_screen_shot()
         return img
 
@@ -2000,10 +2084,20 @@ class TetrisSingleInterface:
 
         ob = self.get_obs()
 
+        height_sum, diff_sum, max_height, holes = get_infos(self.get_seen_grid())
+
+        if self.tetris_1.is_fallen:
+            infos = {'height_sum': height_sum, 
+                     'diff_sum': diff_sum,
+                     'max_height': max_height,
+                     'holes': holes}
+        else:
+            infos = {}
+
         if end:
             self.reset()
 
-        return ob, scores, end, {}
+        return ob, scores, end, infos
 
     def reset(self):
         # Reset the state of the environment to an initial state

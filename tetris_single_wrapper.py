@@ -52,7 +52,19 @@ class TetrisSingleEnv(gym.Env):
     def step(self, action):
         # Execute one time step within the environment
 
-        return self.game_interface.act(action)
+        ob, reward, end, infos = self.game_interface.act(action)
+
+
+        if len(infos) != 0:
+            reward += infos['height_sum'] / 50 / 1000
+
+            reward -= infos['diff_sum'] / 40 / 1000
+
+            reward -= infos['max_height'] / 30 / 1000
+
+            reward -= infos['holes'] / 20 / 1000
+
+        return ob, reward, end, infos
 
     def reset(self):
         # Reset the state of the environment to an initial state
@@ -80,16 +92,18 @@ class TetrisSingleEnv(gym.Env):
 if __name__ == "__main__":
     # play()
 
-    env = TetrisSingleEnv(gridchoice="none", obs_type="image", mode="human")
+    env = TetrisSingleEnv(gridchoice="none", obs_type="grid", mode="human")
 
     ob = env.reset()
     import time
     start = time.time()
     for i in range(200000):
         action = env.random_action()
-        action = 1
-        ob, reward, done, _ = env.step(action)
-
+        # action = 3
+        ob, reward, done, infos = env.step(action)
+        # print(ob)
+        if len(infos) != 0:
+            print(infos)
         # im = Image.fromarray(ob)
         # im.save("samples/%d.png" % i)
         if done:

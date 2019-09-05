@@ -2,10 +2,18 @@
 
 This project is to reproduce the popular Facebook game -- Tetris Battle (Not available playing online now). I also offer the wrapper of the game for training AI agent.
 
+It is a highly restored version of original game, with features as follow: <br/>
+- 2 players <br/>
+- UI (credits to https://github.com/xuyuwei/tetris-battle) <br/>
+- T spin and Tetris (parts credits to https://github.com/xuyuwei/tetris-battle) <br/>
+- back to back <br/>
+- garbage lines (parts credits to https://github.com/xuyuwei/tetris-battle) <br/>
+- alarm for attacks <br/>
+
 The repository contains:
 
-1. Single player mode (tetris_single.py)
-2. Two players mode (tetris_double.py)
+1. Single player mode
+2. Two players mode
 3. Wrapper for training AI agent, wrapped as OpenAI [gym](https://github.com/openai/gym) environment. (tetris_single_wrapper.py)
 
 ## **Demo**

@@ -4,11 +4,13 @@ This project is to reproduce the popular Facebook game -- Tetris Battle (Not ava
 
 It is a highly restored version of original game, with features as follow: <br/>
 - 2 players <br/>
-- UI (credits to https://github.com/xuyuwei/tetris-battle) <br/>
-- T spin and Tetris (parts credits to https://github.com/xuyuwei/tetris-battle) <br/>
+- UI  <br/>
+- T spin and Tetris <br/>
 - back to back <br/>
-- garbage lines (parts credits to https://github.com/xuyuwei/tetris-battle) <br/>
+- garbage lines <br/>
 - alarm for attacks <br/>
+
+Note that some of them are credited to https://github.com/xuyuwei/tetris-battle.
 
 The repository contains:
 

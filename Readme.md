@@ -24,21 +24,28 @@ demo the functions: tetris, combo and ko.
 ![two player](imgs/demo_double.gif)
 
 ## **Requirements**
-python3 <br/>
-pygame
+```
+python3 
+pygame 
+Linux system 
+```
+
+Note that pygame might have conflicts with macOS. <br/>
+
+In my case, the program works well on macOS 10.14.6 with `pygame==2.0.0.dev1` and `python==3.7.4`. However, it breaks with `pygame==1.9.4`.
 
 ## **How to play**
 
 ### Single player
 
 ```
-python tetris_single.py
+python tetris_game.py --mode single
 ```
 
 ### Two players
 
 ```
-python tetris_double.py
+python tetris_game.py --mode double
 ```
 
 ## **Disclaimer**

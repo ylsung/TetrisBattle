@@ -608,6 +608,8 @@ class Tetris(object):
 
         self.oldko = 0 # these two used to keep track of ko's
 
+        self._n_used_block = 1
+
         self.buffer = Buffer()
         # list of the held piece
         self.held = None
@@ -666,6 +668,8 @@ class Tetris(object):
 
         self.oldko = 0 # these two used to keep track of ko's
 
+        self._n_used_block = 1
+
         self.buffer = Buffer()
         # list of the held piece
         self.held = None
@@ -720,20 +724,32 @@ class Tetris(object):
 
         self.natural_down_counter = 0
 
-
     @property
     def is_fallen(self):
         return self._is_fallen
-    
 
+    @property
+    def n_used_block(self):
+        return self._n_used_block
+    
     def get_grid(self):
         excess = len(self.grid[0]) - GRID_DEPTH
         return_grids = np.zeros(shape=(GRID_WIDTH, GRID_DEPTH), dtype=np.float32)
+        
+        block, px, py = self.block, self.px, self.py
+        excess = len(self.grid[0]) - GRID_DEPTH
+        b = block.now_block()
 
         for i in range(len(self.grid)):
             return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+        return_grids[return_grids > 0] = 1
+        for x in range(BLOCK_WIDTH):
+            for y in range(BLOCK_LENGTH):
+                if b[x][y] > 0:
+                    if -1 < px + x < 10 and -1 < py + y - excess < 20:
+                        return_grids[px + x][py + y - excess] = 0.5
 
-        return return_grids
+        return np.transpose(return_grids, (1, 0))
 
     def reset_pos(self):
         self.px = 4
@@ -972,6 +988,7 @@ class Tetris(object):
         self.reset_pos()
         self.isholded = 0
         self.tspin = 0
+        self._n_used_block += 1
 
     def update_ko(self):
         self.oldko = self.KO
@@ -1348,8 +1365,8 @@ class TetrisGame:
 
     def __init__(self):
         global SCREEN, IMAGES
+        # SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT), pygame.FULLSCREEN) # SCREEN is 800*600 
         SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # SCREEN is 800*600 
-
         IMAGES = load_imgs()
 
     def setmap(self):
@@ -1688,7 +1705,7 @@ class TetrisGameDouble(TetrisGame):
                 return [b, "endgame", tetris_2.get_id()]
             
             if time >= 0:
-                time -= timer2p.tick()
+                time -= timer2p.tick() * SPEED_UP
             else:
                 time = 0
                 drawTime2p(time)
@@ -1762,6 +1779,7 @@ class TetrisGameSingle(TetrisGame):
         # print("213")
         
         #main loop
+        kk = 0
         while running:
             # battlemusic.play()#plays music
             
@@ -1780,6 +1798,11 @@ class TetrisGameSingle(TetrisGame):
                 # print(tetris_1.px, tetris_1.py)
                 # compute the scores and attack the opponent
                 scores = tetris_1.clear()
+
+                kk += 1
+
+                print(kk)
+                print(get_infos(tetris_1.get_grid()), tetris_1.n_used_block)
 
                 # tetris_2.add_attacked(scores)
 
@@ -1823,7 +1846,7 @@ class TetrisGameSingle(TetrisGame):
             # pygame.display.update(r)
 
             if time >= 0:
-                time -= timer2p.tick()
+                time -= timer2p.tick() * SPEED_UP
             else:
                 time = 0
 
@@ -2046,7 +2069,7 @@ class TetrisSingleInterface:
 
                 freeze(0.5)
 
-                scores -= 1
+                scores -= 5
 
                 end = 1
 
@@ -2066,7 +2089,7 @@ class TetrisSingleInterface:
         # pygame.display.flip()
 
         if self.time >= 0:
-            self.time -= self.timer2p.tick()
+            self.time -= self.timer2p.tick() * SPEED_UP
         else:
             self.time = 0
             end = 1
@@ -2090,7 +2113,8 @@ class TetrisSingleInterface:
             infos = {'height_sum': height_sum, 
                      'diff_sum': diff_sum,
                      'max_height': max_height,
-                     'holes': holes}
+                     'holes': holes, 
+                     'n_used_block': tetris_1.n_used_block}
         else:
             infos = {}
 

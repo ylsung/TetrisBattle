@@ -99,9 +99,12 @@ if __name__ == "__main__":
     start = time.time()
     for i in range(200000):
         action = env.random_action()
-        # action = 3
+        # if i % 2 == 0:
+        #     action = 2
+        # else:
+        #     action = 0
         ob, reward, done, infos = env.step(action)
-        # print(ob)
+        print(ob)
         if len(infos) != 0:
             print(infos)
         # im = Image.fromarray(ob)

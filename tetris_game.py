@@ -344,7 +344,7 @@ class TetrisGameDouble(TetrisGame):
                 pygame.draw.rect(self.screen, (30, 30, 30), (298, 140, 3, 360)) 
 
             if tetris_1.attacked != 0:
-                for i in range(tetris_2.attacked):
+                for i in range(tetris_1.attacked):
                     pygame.draw.rect(self.screen, (255, 0, 0), (298, 481 - 18 * i, 3, 18)) 
 
             if tetris_2.attacked == 0:

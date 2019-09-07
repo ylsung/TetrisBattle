@@ -312,4 +312,5 @@ class Renderer(object):
         self.screen.blit(obj, (sx, sy))
 
     def drawKO(self, ko, sx, sy):
+        # print(ko)
         self.screen.blit(self.images["kos"][ko - 1], (sx, sy))

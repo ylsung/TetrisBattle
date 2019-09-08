@@ -883,6 +883,8 @@ class Tetris(object):
         # print(self.pre_back2back, self.now_back2back)
         # self.tspin = 0
 
+        self.cleared = cleared
+
         self.sent += scores
 
         real_attacked = max(0, self._attacked - scores)

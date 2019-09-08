@@ -13,36 +13,36 @@ from tetris import Tetris, Player, Judge, get_infos, freeze
 from renderer import Renderer
 
 
-pos_player1 = {
-    'combo': (44, 437),
-    'tetris': (314, 477),
-    'tspin': (304, 477),
-    'back2back': (314, 437),
-    'board': (112, 138),
-    'drawscreen': (112, 138),
-    'big_ko': (44, 235),
-    'ko': (140, 233),
-    'transparent': (110, 135),
-    'gamescreen': (0, 0), 
-    'attack_clean': (298, 140, 3, 360),
-    'attack_alarm': (298, 481, 3, 18)
-
-}
-
-pos_player2 = {
-    'combo': (415, 437),
-    'tetris': (685, 477),
-    'tspin': (675, 477),
-    'back2back': (685, 437),
-    'board': (495, 138),
-    'drawscreen': (495, 138),
-    'big_ko': (426, 235),
-    'ko': (527, 233),
-    'transparent': (494, 135),
-    'gamescreen': (0, 0), 
-    'attack_clean': (680, 140, 3, 360),
-    'attack_alarm': (680, 481, 3, 18)
-}
+POS_LIST = [
+    {
+        'combo': (44, 437),
+        'tetris': (314, 477),
+        'tspin': (304, 477),
+        'back2back': (314, 437),
+        'board': (112, 138),
+        'drawscreen': (112, 138),
+        'big_ko': (44, 235),
+        'ko': (140, 233),
+        'transparent': (110, 135),
+        'gamescreen': (0, 0), 
+        'attack_clean': (298, 140, 3, 360),
+        'attack_alarm': (298, 481, 3, 18)
+    },
+    {
+        'combo': (415, 437),
+        'tetris': (685, 477),
+        'tspin': (675, 477),
+        'back2back': (685, 437),
+        'board': (495, 138),
+        'drawscreen': (495, 138),
+        'big_ko': (426, 235),
+        'ko': (527, 233),
+        'transparent': (494, 135),
+        'gamescreen': (0, 0), 
+        'attack_clean': (680, 140, 3, 360),
+        'attack_alarm': (680, 481, 3, 18)
+    }
+]
 
 class ComEvent:
     def __init__(self):
@@ -136,57 +136,28 @@ class TetrisSingleInterface:
 
         self._action_set = list(range(self._n_actions))
 
-        info_dict_1 = {
-            "id": 0,
-            # "hold": 0,
-            # "drop": 1,
-            # "rotate_right": 2,
-            # "rotate_left": 3,
-            # "right": 4,
-            # "left": 5,
-            # "down": 6
-            }
-
-        for k, v in self._action_meaning.items():
-            info_dict_1[v] = k
-
-        # print(info_dict_1)
-
         self.tetris_list = []
 
-        self.tetris_list.append({
-            'info_dict': info_dict_1,
-            'tetris': Tetris(Player(info_dict_1), gridchoice),
-            'com_event': ComEvent(),
-            'pos': pos_player1
-        })
+        self.num_players = 1
+        self.now_player = 0
 
-        # if num_players == 2:
-        info_dict_2 = {
-            "id": 1,
-            # "hold": 0,
-            # "drop": 1,
-            # "rotate_right": 2,
-            # "rotate_left": 3,
-            # "right": 4,
-            # "left": 5,
-            # "down": 6
-            }
+        # create player and psuedo-opponent
+        for i in range(2):
+            info_dict = {"id": i}
 
-        for k, v in self._action_meaning.items():
-            info_dict_2[v] = k
+            # adding the action information
+            for k, v in self._action_meaning.items():
+                info_dict[v] = k
 
-        self.tetris_list.append({
-            'info_dict': info_dict_2,
-            'tetris': Tetris(Player(info_dict_2), gridchoice),
-            'com_event': ComEvent(),
-            'pos': pos_player2
-        })
+            self.tetris_list.append({
+                'info_dict': info_dict,
+                'tetris': Tetris(Player(info_dict), gridchoice),
+                'com_event': ComEvent(),
+                'pos': POS_LIST[i]
+            })
         
 
         # self.com_event = ComEvent()
-        self.num_players = 1
-        self.now_player = 0
 
         self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
 

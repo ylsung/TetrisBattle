@@ -24,7 +24,7 @@ POS_LIST = [
         'attack_clean': (298, 140, 3, 360),
         'attack_alarm': (298, 481, 3, 18),
         'you_win': (120, 230),
-        'you_loss': (515, 230),
+        'you_lose': (115, 230),
     },
     {
         'combo': (415, 437),
@@ -40,7 +40,7 @@ POS_LIST = [
         'attack_clean': (680, 140, 3, 360),
         'attack_alarm': (680, 481, 3, 18),
         'you_win': (520, 230),
-        'you_loss': (115, 230),
+        'you_lose': (515, 230),
     }
 ]
 
@@ -49,8 +49,8 @@ class TetrisGame:
     #will be used for choosing what map you want to play on
 
     def __init__(self):
-        import os 
-        os.environ["SDL_VIDEODRIVER"] = "dummy"
+        # import os 
+        # os.environ["SDL_VIDEODRIVER"] = "dummy"
         # SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT), pygame.FULLSCREEN) # SCREEN is 800*600 
         self.screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # SCREEN is 800*600 
         images = load_imgs()
@@ -368,7 +368,7 @@ class TetrisGameDouble(TetrisGame):
                     winner = opponent["tetris"].get_id()
 
                 if time >= 0:
-                    self.time -= timer2p.tick() * SPEED_UP
+                    time -= timer2p.tick() * SPEED_UP
                 else:
                     time = 0
                     winner = Judge.who_win(tetris, opponent["tetris"])

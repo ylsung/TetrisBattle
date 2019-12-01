@@ -44,7 +44,12 @@ Note that pygame might have conflicts with macOS. <br/>
 
 In my case, the program works well on macOS 10.14.6 with `pygame==2.0.0.dev1` and `python==3.7.4`. However, it breaks with `pygame==1.9.4`.
 
-## **How to play**
+## **Installation**
+```
+python setup.py develop
+```
+
+## **Usage**
 
 ### Single player
 
@@ -57,6 +62,9 @@ python tetris_game.py --mode single
 ```
 python tetris_game.py --mode double
 ```
+
+### Usage for environment
+Please refer to `example.py`.
 
 ## **Disclaimer**
 

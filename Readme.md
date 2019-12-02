@@ -16,18 +16,18 @@ The repository contains:
 
 1. Single player mode
 2. Two players mode
-3. Environments for training AI agent, wrapped as OpenAI [gym](https://github.com/openai/gym) environment. (`tetris_single_env.py`, `tetris_double_env.py`)
+3. Environments for training AI agent, wrapped as OpenAI [gym](https://github.com/openai/gym) environment. (e.g. `tetris_env.py`)
 
 ## **Demo**
 
 
-### Single player
+### Single player mode
 
 demo the fuctions: tspin and back to back.
 
 ![single player](imgs/demo_single.gif)
 
-### Two players
+### Two players mode
 
 demo the functions: tetris, combo and ko.
 
@@ -51,20 +51,22 @@ python setup.py develop
 
 ## **Usage**
 
-### Single player
+### Single player mode
 
 ```
-python tetris_game.py --mode single
+python -m game.tetris_game --mode single
 ```
 
-### Two players
+### Two players mode
 
 ```
-python tetris_game.py --mode double
+python -m game.tetris_game --mode double
 ```
 
-### Usage for environment
+### Usage for environments
 Please refer to `example.py`.
+
+Note: You can define your reward function in `reward_func` in `tetris_interface.py`
 
 ## **Disclaimer**
 

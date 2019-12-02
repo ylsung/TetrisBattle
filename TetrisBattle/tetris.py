@@ -525,64 +525,8 @@ class Tetris(object):
 
 
         self.player = player
-        self.grid = deepcopy(self.o_grid)
 
-        self.oldko = 0 # these two used to keep track of ko's
-
-        self._n_used_block = 1
-
-        self.buffer = Buffer()
-        # list of the held piece
-        self.held = None
-        self.block = self.buffer.new_block()
-
-        # amount of lines sent for p1 and p2
-        self.sent = 0
-        self.tempsend = 0 # tempsending for p1 and p2
-        self.oldcombo = self.combo = -1 # used for checking comboas
-        self.tspin = 0 # for t spin
-        self.now_back2back = 0
-        self.pre_back2back = 0
-        self.tetris = 0
-
-        #for "KO"
-        self._KO = 0 
-
-        self._attacked = 0
-        self._is_fallen = 0
-
-        self.px = 4
-        self.py = -2
-
-        # DEFINING VARIABLES
-        self.cleared = 0
-        self.kocounter = 0
-        self.stopcounter = 0
-
-        self.isholded = 0
-
-        self.pressedRight = False
-        self.pressedLeft = False
-        self.pressedDown = False
-
-        self.LAST_ROTATE_TIME = t.time()
-        self.LAST_MOVE_SHIFT_TIME = t.time()
-        self.LAST_MOVE_DOWN_TIME = t.time()
-        self.LAST_COMBO_DRAW_TIME = t.time()
-        self.LAST_TETRIS_DRAW_TIME = t.time()
-        self.LAST_TSPIN_DRAW_TIME = t.time()
-        self.LAST_BACK2BACK_DRAW_TIME = t.time()
-        self.LAST_NATRUAL_FALL_TIME = t.time()
-        self.LAST_FALL_DOWN_TIME = t.time()
-
-
-        self.tetris_drawing = 0
-        self.tspin_drawing = 0
-        self.back2back_drawing = 0
-
-        self.combo_counter = 0
-
-        self.natural_down_counter = 0
+        self.reset()
 
     def reset(self):
         self.grid = deepcopy(self.o_grid)

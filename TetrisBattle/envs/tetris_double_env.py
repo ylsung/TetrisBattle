@@ -451,7 +451,6 @@ class TetrisDoubleEnv(gym.Env):
         #     return self.viewer.isopen
 
 
-
 if __name__ == "__main__":
     # play()
 

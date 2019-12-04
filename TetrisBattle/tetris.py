@@ -570,15 +570,15 @@ class Tetris(object):
         self.pressedDown = False
 
 
-        self.LAST_ROTATE_TIME = t.time()
-        self.LAST_MOVE_SHIFT_TIME = t.time()
-        self.LAST_MOVE_DOWN_TIME = t.time()
-        self.LAST_COMBO_DRAW_TIME = t.time()
-        self.LAST_TETRIS_DRAW_TIME = t.time()
-        self.LAST_TSPIN_DRAW_TIME = t.time()
-        self.LAST_BACK2BACK_DRAW_TIME = t.time()
-        self.LAST_NATRUAL_FALL_TIME = t.time()
-        self.LAST_FALL_DOWN_TIME = t.time()
+        self.LAST_ROTATE_TIME = 0
+        self.LAST_MOVE_SHIFT_TIME = 0
+        self.LAST_MOVE_DOWN_TIME = 0
+        self.LAST_COMBO_DRAW_TIME = 0
+        self.LAST_TETRIS_DRAW_TIME = 0
+        self.LAST_TSPIN_DRAW_TIME = 0
+        self.LAST_BACK2BACK_DRAW_TIME = 0
+        self.LAST_NATRUAL_FALL_TIME = 0
+        self.LAST_FALL_DOWN_TIME = 0
 
 
         self.tetris_drawing = 0
@@ -588,6 +588,17 @@ class Tetris(object):
         self.combo_counter = 0
 
         self.natural_down_counter = 0
+
+    def increment_timer(self):
+        self.LAST_ROTATE_TIME += 1
+        self.LAST_MOVE_SHIFT_TIME += 1
+        self.LAST_MOVE_DOWN_TIME += 1
+        self.LAST_COMBO_DRAW_TIME += 1
+        self.LAST_TETRIS_DRAW_TIME += 1
+        self.LAST_TSPIN_DRAW_TIME += 1
+        self.LAST_BACK2BACK_DRAW_TIME += 1
+        self.LAST_NATRUAL_FALL_TIME += 1
+        self.LAST_FALL_DOWN_TIME += 1
 
     @property
     def is_fallen(self):
@@ -690,33 +701,36 @@ class Tetris(object):
         self._attacked = min(self._attacked, GRID_DEPTH)
 
     def natural_down(self):
-        if t.time() - self.LAST_NATRUAL_FALL_TIME >= NATRUAL_FALL_FREQ:
+        if self.LAST_NATRUAL_FALL_TIME >= NATRUAL_FALL_FREQ:
             if collideDown(self.grid, self.block, self.px, self.py) == False:
                 self.stopcounter = 0
                 # self.block.move_down()
                 self.py += 1
                 # pass
 
-            self.LAST_NATRUAL_FALL_TIME = t.time()
+            self.LAST_NATRUAL_FALL_TIME = 0
         # else:
         #     self.natural_down_counter += 1
 
     def trigger(self, evt):
+        # if (hasattr(evt, "key")):
+        #     print(evt.key)
         if evt.type == pygame.KEYDOWN:
-            if evt.key == self.player.rotate_right and t.time() - self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
+            if evt.key == self.player.rotate_right and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=1)
-                self.LAST_ROTATE_TIME = t.time()
+                self.LAST_ROTATE_TIME = 0
 
-            if evt.key == self.player.rotate_left and t.time() - self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
+            if evt.key == self.player.rotate_left and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=-1)
-                self.LAST_ROTATE_TIME = t.time()
+                self.LAST_ROTATE_TIME = 0
 
             if evt.key == self.player.drop: # harddrop
                 y = hardDrop(self.grid, self.block, self.px, self.py) # parameters
                 # self.block.move_down(y)
                 self.py += y
                 # self.stopcounter = COLLIDE_DOWN_COUNT
-                self.LAST_FALL_DOWN_TIME = -FALL_DOWN_FREQ
+                # self.LAST_FALL_DOWN_TIME = -FALL_DOWN_FREQ
+                self.LAST_FALL_DOWN_TIME = FALL_DOWN_FREQ
 
             if evt.key == self.player.hold: #holding 
 
@@ -751,23 +765,23 @@ class Tetris(object):
     # when respective buttons are pressed
     def move(self):
         # if keys[self.right]:
-        if self.pressedRight and t.time() - self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
+        if self.pressedRight and self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
             if collideRight(self.grid, self.block, self.px, self.py) == False:    
-                self.LAST_MOVE_SHIFT_TIME = t.time()
+                self.LAST_MOVE_SHIFT_TIME = 0
 
                 # self.block.move_right()
                 self.px += 1
 
-        if self.pressedLeft and t.time() - self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
+        if self.pressedLeft and self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
             if collideLeft(self.grid, self.block, self.px, self.py) == False:
-                self.LAST_MOVE_SHIFT_TIME = t.time()
+                self.LAST_MOVE_SHIFT_TIME = 0
 
                 # self.block.move_left()
                 self.px -= 1
 
-        if self.pressedDown and t.time() - self.LAST_MOVE_DOWN_TIME > MOVE_DOWN_FREQ:
+        if self.pressedDown and self.LAST_MOVE_DOWN_TIME > MOVE_DOWN_FREQ:
             if collideDown(self.grid, self.block, self.px, self.py) == False:
-                self.LAST_MOVE_DOWN_TIME = t.time()
+                self.LAST_MOVE_DOWN_TIME = 0
                 # self.stopcounter = 0
 
                 # self.block.move_down()
@@ -776,7 +790,7 @@ class Tetris(object):
     def check_fallen(self):
         if collideDown(self.grid, self.block, self.px, self.py) == True:
             # self.stopcounter += 1
-            if t.time() - self.LAST_FALL_DOWN_TIME >= FALL_DOWN_FREQ:
+            if self.LAST_FALL_DOWN_TIME >= FALL_DOWN_FREQ:
                 self._is_fallen = 1
                 put_block_in_grid(self.grid, self.block, self.px, self.py)
                 # print("fallen")
@@ -786,7 +800,7 @@ class Tetris(object):
         else:
             self._is_fallen = 0
             # self.stopcounter = 0
-            self.LAST_FALL_DOWN_TIME = t.time()
+            self.LAST_FALL_DOWN_TIME = 0
 
         return False
 

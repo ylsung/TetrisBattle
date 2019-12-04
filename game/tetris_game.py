@@ -343,6 +343,8 @@ class TetrisGameDouble(TetrisGame):
 
                 self.renderer.drawGameScreen(tetris)
 
+                tetris.increment_timer()
+
                 if tetris.attacked == 0:
                     pygame.draw.rect(self.screen, (30, 30, 30), pos["attack_clean"]) 
 
@@ -500,6 +502,8 @@ class TetrisGameSingle(TetrisGame):
             self.renderer.drawScreen(tetris, *pos["drawscreen"])
 
             self.renderer.drawByName("transparent", *opponent_pos["transparent"])
+
+            tetris.increment_timer()
 
             # pygame.display.update(r)
 

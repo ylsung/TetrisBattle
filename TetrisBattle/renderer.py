@@ -18,7 +18,7 @@ class Renderer(object):
 
             pygame.display.update(r)
 
-            tetris.LAST_COMBO_DRAW_TIME = t.time()
+            tetris.LAST_COMBO_DRAW_TIME = 0
 
             return True
 
@@ -35,7 +35,7 @@ class Renderer(object):
             
             pygame.display.update(r)
 
-            tetris.LAST_TETRIS_DRAW_TIME = t.time()
+            tetris.LAST_TETRIS_DRAW_TIME = 0
             tetris.tetris_drawing = 1
 
             # print("tetris")
@@ -50,7 +50,7 @@ class Renderer(object):
             
             pygame.display.update(r)
 
-            tetris.LAST_TSPIN_DRAW_TIME = t.time()
+            tetris.LAST_TSPIN_DRAW_TIME = 0
             tetris.tspin_drawing = 1
 
             return True
@@ -63,7 +63,7 @@ class Renderer(object):
             
             pygame.display.update(r)
 
-            tetris.LAST_BACK2BACK_DRAW_TIME = t.time()
+            tetris.LAST_BACK2BACK_DRAW_TIME = 0
             tetris.back2back_drawing = 1
 
             return True
@@ -71,19 +71,19 @@ class Renderer(object):
         return False
 
     def drawGameScreen(self, tetris):
-        if t.time() - tetris.LAST_COMBO_DRAW_TIME > COMBO_COUNT_FREQ and tetris.check_combo():
+        if tetris.LAST_COMBO_DRAW_TIME > COMBO_COUNT_FREQ and tetris.check_combo():
             self.screen.blit(self.images["gamescreen"], (0, 0))
             tetris.oldcombo = tetris.combo
 
-        if t.time() - tetris.LAST_TSPIN_DRAW_TIME > TSPIN_FREQ and tetris.tspin_drawing:
+        if tetris.LAST_TSPIN_DRAW_TIME > TSPIN_FREQ and tetris.tspin_drawing:
             self.screen.blit(self.images["gamescreen"], (0, 0))
             tetris.tspin_drawing = 0
 
-        if t.time() - tetris.LAST_TETRIS_DRAW_TIME > TETRIS_FREQ and tetris.tetris_drawing:
+        if tetris.LAST_TETRIS_DRAW_TIME > TETRIS_FREQ and tetris.tetris_drawing:
             self.screen.blit(self.images["gamescreen"], (0, 0))
             tetris.tetris_drawing = 0
 
-        if t.time() - tetris.LAST_BACK2BACK_DRAW_TIME > BACK2BACK_FREQ and tetris.back2back_drawing:
+        if tetris.LAST_BACK2BACK_DRAW_TIME > BACK2BACK_FREQ and tetris.back2back_drawing:
             self.screen.blit(self.images["gamescreen"], (0, 0))
             tetris.back2back_drawing = 0
             # tetris.combo += 1

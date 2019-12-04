@@ -172,6 +172,7 @@ if __name__ == "__main__":
         # print(reward)
         if len(infos) != 0:
             print(infos)
+        
         # im = Image.fromarray(ob)
         # im.save("samples/%d.png" % i)
         if done:

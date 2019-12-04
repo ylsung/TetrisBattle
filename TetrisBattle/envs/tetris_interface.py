@@ -138,6 +138,8 @@ class TetrisInterface(abc.ABC):
         # print(self.action_space.n)
 
         self._action_set = list(range(self._n_actions))
+        
+        self.repeat = 20 // SPEED_UP # emulate the latency of human action
 
         self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
 
@@ -202,12 +204,30 @@ class TetrisInterface(abc.ABC):
         # define the reward function based on the given infos
         raise NotImplementedError
 
+    
+    def task_before_action(self, player):
+        # set up the clock and curr_repeat_time
+        # set the action to last_action if curr_repeat_time != 0
+
+        self.timer2p.tick() # start calculate the game time
+        player["curr_repeat_time"] += 1
+        player["curr_repeat_time"] %= self.repeat
+
+    def get_true_action(self, player, action):
+        if player["curr_repeat_time"] != 0:
+            action = player["last_action"]
+        
+        player["last_action"] = action
+
+        return action
+
     def reset(self):
         # Reset the state of the environment to an initial state
 
         self.time = MAX_TIME
         self.now_player = random.randint(0, self.num_players - 1)
         self.total_reward = 0
+        self.curr_repeat_time = 0 # denote the current repeat times
         self.last_infos = {'height_sum': 0, 
                            'diff_sum': 0,
                            'max_height': 0,
@@ -220,6 +240,8 @@ class TetrisInterface(abc.ABC):
             tetris = player["tetris"]
             com_event = player["com_event"]
             pos = player["pos"]
+            player["curr_repeat_time"] = 0
+            player["last_action"] = 0
             tetris.reset()
 
             com_event.reset()
@@ -267,7 +289,9 @@ class TetrisSingleInterface(TetrisInterface):
                 'info_dict': info_dict,
                 'tetris': Tetris(Player(info_dict), gridchoice),
                 'com_event': ComEvent(),
-                'pos': POS_LIST[i]
+                'pos': POS_LIST[i],
+                'curr_repeat_time': 0,
+                'last_action': 0
             })
             
         self.reset()
@@ -285,6 +309,7 @@ class TetrisSingleInterface(TetrisInterface):
 
     def act(self, action):
         # Execute one time step within the environment
+        
         end = 0
         scores = 0
 
@@ -292,6 +317,29 @@ class TetrisSingleInterface(TetrisInterface):
         tetris = player["tetris"]
         com_event = player["com_event"]
         pos = player["pos"]
+
+        self.task_before_action(player)
+
+        # mapping_dict = {
+        #     "NOPE": 0,
+        #     pygame.K_c: 1,
+        #     pygame.K_SPACE: 2,
+        #     pygame.K_UP: 3,
+        #     pygame.K_z: 4,
+        #     pygame.K_RIGHT: 5,
+        #     pygame.K_LEFT: 6,
+        #     pygame.K_DOWN: 7
+        # }
+
+        # action = 0
+
+        # for evt in pygame.event.get():
+        #     if evt.type == pygame.KEYDOWN:
+        #         if mapping_dict.get(evt.key) is not None:
+        #             action = mapping_dict[evt.key]
+        #             print(action)
+
+        action = self.get_true_action(player, action)
 
         tetris.natural_down()
 
@@ -340,6 +388,8 @@ class TetrisSingleInterface(TetrisInterface):
             tetris.new_block()
 
         self.renderer.drawGameScreen(tetris)
+
+        tetris.increment_timer()
 
         # if tetris.attacked == 0:
         #     pygame.draw.rect(self.screen, (30, 30, 30), pos["attack_clean"]) 
@@ -448,6 +498,7 @@ class TetrisDoubleInterface(TetrisInterface):
 
     def act(self, action):
         # Execute one time step within the environment
+        
         end = 0
         scores = 0
 
@@ -455,6 +506,10 @@ class TetrisDoubleInterface(TetrisInterface):
         tetris = player["tetris"]
         com_event = player["com_event"]
         pos = player["pos"]
+
+        self.task_before_action(player)
+
+        action = self.get_true_action(player, action)
 
         tetris.natural_down()
 
@@ -500,6 +555,8 @@ class TetrisDoubleInterface(TetrisInterface):
             tetris.new_block()
 
         self.renderer.drawGameScreen(tetris)
+
+        tetris.increment_timer()
 
         if tetris.attacked == 0:
             pygame.draw.rect(self.screen, (30, 30, 30), pos["attack_clean"]) 

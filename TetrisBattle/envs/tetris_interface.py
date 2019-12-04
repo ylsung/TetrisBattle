@@ -299,10 +299,12 @@ class TetrisSingleInterface(TetrisInterface):
     def reward_func(self, infos):
 
         if infos['is_fallen']:
-            basic_reward = infos['scores'] + infos['cleared']
-            additional_reward = 0.01 if infos['holes'] == 0 else 0
+            basic_reward = infos['scores']
+            # additional_reward = 0.01 if infos['holes'] == 0 else 0
 
-            return basic_reward + additional_reward - infos['penalty']
+            additional_reward = -0.51 * infos['height_sum'] + 0.76 * infos['cleared'] - 0.36 * infos['holes'] - 0.18 * infos['diff_sum']
+
+            return basic_reward + 0.01 * additional_reward - infos['penalty']
         
         return 0
 

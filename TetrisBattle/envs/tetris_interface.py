@@ -304,7 +304,8 @@ class TetrisSingleInterface(TetrisInterface):
 
             additional_reward = -0.51 * infos['height_sum'] + 0.76 * infos['cleared'] - 0.36 * infos['holes'] - 0.18 * infos['diff_sum']
 
-            return basic_reward + 0.01 * additional_reward - infos['penalty']
+            # return basic_reward + 0.01 * additional_reward - infos['penalty']
+            return basic_reward + 0.01 * additional_reward + infos['reward_notdie']
         
         return 0
 
@@ -357,6 +358,8 @@ class TetrisSingleInterface(TetrisInterface):
         scores = 0
         
         penalty_die = 0
+
+        reward_notdie = 0
 
         if tetris.check_fallen():
             # compute the scores and attack the opponent
@@ -415,6 +418,7 @@ class TetrisSingleInterface(TetrisInterface):
             self.time -= self.timer2p.tick() * SPEED_UP
         else:
             self.time = 0
+            reward_notdie = 10
             end = 1
 
         self.renderer.drawTime2p(self.time)
@@ -442,6 +446,7 @@ class TetrisSingleInterface(TetrisInterface):
             infos['scores'] =  scores 
             infos['cleared'] =  tetris.cleared
             infos['penalty'] =  penalty_die
+            infos['reward_notdie'] = reward_notdie
             
             self.last_infos = {'height_sum': height_sum,
                                'diff_sum': diff_sum,

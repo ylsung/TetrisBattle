@@ -56,20 +56,22 @@ class TetrisGame:
         images = load_imgs()
         self.renderer = Renderer(self.screen, images)
 
+        self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
+
+        self.timer2p = pygame.time.Clock() # this will be used for counting down time in our game
+
         # whether to fix the speed cross device. Do this by 
         # fix the FPS to FPS (100)
         self._fix_speed_cross_device = True
         self._fix_fps = FPS
 
-    def update_time(self, _time):
+    def update_time(self, _time, running):
         # update the time clock and return the running state
-
-        if self._fix_speed_cross_device:
-            time_per_while = 1 / self._fix_fps
-        else:
-            time_per_while = timer2p.tick()
         
-        running = True
+        if self._fix_speed_cross_device:
+            time_per_while = 1 / self._fix_fps * 1000 # transform to milisecond
+        else:
+            time_per_while = self.timer2p.tick()      # milisecond
 
         if _time >= 0:                
             _time -= time_per_while * SPEED_UP
@@ -81,14 +83,12 @@ class TetrisGame:
 
     def play(self):
         page = "menu"
-        myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
 
-        timer2p = pygame.time.Clock() # this will be used for counting down time in our game
         while page != "exit":
             if page == "menu":
                 page = self.menu(page)
             if page == "start":
-                page = self.start(myClock, timer2p)
+                page = self.start()
             if page == "viewmap":
                 page = self.viewmap()    
             if page == "instructions":
@@ -197,7 +197,6 @@ class TetrisGame:
     #menu page
     def menu(self, page):
         running = True
-        myClock = pygame.time.Clock()
         button1 = pygame.Rect(320, 204, 146, 50)#start rect
         buttons = [pygame.Rect(325, y * 42 + 275, 135, 30) for y in range(3)]#other three rects 
         vals = ["viewmap", "instructions", "exit"]#values of other three rects
@@ -241,11 +240,11 @@ class TetrisGame:
                 self.renderer.drawByName("intro", 0, 0) # reblit the background
             
             #draw.rect(SCREEN,(0,0,0),button1,2)
-            myClock.tick(FPS)            
+            self.myClock.tick(FPS)            
             pygame.display.flip()
 
     #main game function
-    def start(self, myClock, timer2p):
+    def start(self):
         raise NotImplementedError
     
 
@@ -255,11 +254,11 @@ class TetrisGameDouble(TetrisGame):
         super(TetrisGameDouble, self).__init__()
         self.num_players = 2
 
-    def start(self, myClock, timer2p):#parameters are FP/s rate and timer countdown
+    def start(self):#parameters are FP/s rate and timer countdown
     ################################################################################
         
         gridchoice = self.setmap()#calling the setmap function for a choice of grid
-        timer2p.tick()
+        self.timer2p.tick()
         #the code below is what happens when you set a map
         #different maps = differnet grids
                
@@ -273,7 +272,7 @@ class TetrisGameDouble(TetrisGame):
 
         #these two used for countdown
         #of the timer
-        time = MAX_TIME
+        time = MAX_TIME   # milisecond
         delaytime = time
 
         info_dict_list = [
@@ -392,14 +391,14 @@ class TetrisGameDouble(TetrisGame):
                     running = False
                     winner = opponent["tetris"].get_id()
 
-                time, running = self.update_time(time)
+                time, running = self.update_time(time, running)
 
                 if not running:
                     winner = Judge.who_win(tetris, opponent["tetris"])
 
             self.renderer.drawTime2p(time)
 
-            myClock.tick(FPS)   
+            self.myClock.tick(FPS)   
             pygame.display.flip()
 
         if force_quit:
@@ -446,12 +445,12 @@ class TetrisGameSingle(TetrisGame):
                            'holes': 0,
                            'n_used_block': 0}
 
-    def start(self, myClock, timer2p):#parameters are FP/s rate and timer countdown
+    def start(self):#parameters are FP/s rate and timer countdown
     ################################################################################
 
         gridchoice = self.setmap()#calling the setmap function for a choice of grid
 
-        timer2p.tick()
+        self.timer2p.tick()
         #the code below is what happens when you set a map
         #different maps = differnet grids
 
@@ -465,7 +464,7 @@ class TetrisGameSingle(TetrisGame):
 
         #these two used for countdown
         #of the timer
-        time = MAX_TIME
+        time = MAX_TIME  # milisecond
         delaytime = time
 
         info_dict = {
@@ -556,13 +555,13 @@ class TetrisGameSingle(TetrisGame):
 
             # pygame.display.update(r)
 
-            time, running = self.update_time(time)
+            time, running = self.update_time(time, running)
 
             self.renderer.drawTime2p(time)
 
             # time goes until it hits zero
             # when it hits zero return endgame SCREEN
-            myClock.tick(FPS)   
+            self.myClock.tick(FPS)   
             pygame.display.flip()
 
         if force_quit:

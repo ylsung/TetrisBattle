@@ -50,7 +50,7 @@ FALL_DOWN_FREQ = 40.0 / SPEED_UP
 
 NATRUAL_FALL_FREQ = 80.0 / SPEED_UP
 
-MOVE_SHIFT_FREQ = 13.0 / SPEED_UP
+MOVE_SHIFT_FREQ = 10.0 / SPEED_UP
 
 MOVE_DOWN_FREQ = 10.0 / SPEED_UP
 
@@ -112,9 +112,9 @@ PIECES_DICT = {
 
 PIECE_NUM2TYPE = {1: 'I', 2: 'O', 3: 'J', 4: 'L', 5: 'Z', 6: 'S', 7: 'T', 8: 'G'}
 PIECE_TYPE2NUM = {val: key for key, val in PIECE_NUM2TYPE.items()}
-POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
+# POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
 
-# POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
+POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
 # POSSIBLE_KEYS = ['L', 'L', 'J', 'J', 'J', 'L', 'L']
 
 # POSSIBLE_KEYS = ['I', 'I', 'I', 'I', 'O', 'O', 'O']

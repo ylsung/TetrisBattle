@@ -61,7 +61,7 @@ class TetrisGame:
         self._fix_speed_cross_device = True
         self._fix_fps = FPS
 
-    def update_time(_time):
+    def update_time(self, _time):
         # update the time clock and return the running state
 
         if self._fix_speed_cross_device:

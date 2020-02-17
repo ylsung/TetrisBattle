@@ -71,13 +71,13 @@ class TetrisGame:
         
         running = True
 
-        if time >= 0:                
-            time -= time_per_while * SPEED_UP
+        if _time >= 0:                
+            _time -= time_per_while * SPEED_UP
         else:
-            time = 0
+            _time = 0
             running = False
 
-        return time, running
+        return _time, running
 
     def play(self):
         page = "menu"

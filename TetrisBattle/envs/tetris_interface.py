@@ -139,7 +139,7 @@ class TetrisInterface(abc.ABC):
 
         self._action_set = list(range(self._n_actions))
         
-        self.repeat = 20 // SPEED_UP # emulate the latency of human action
+        self.repeat = 10 // SPEED_UP # emulate the latency of human action
 
         self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
 
@@ -453,6 +453,8 @@ class TetrisSingleInterface(TetrisInterface):
                                'max_height': max_height,
                                'holes': holes,
                                'n_used_block': tetris.n_used_block}
+
+            print(infos)
 
         reward = self.reward_func(infos)
 

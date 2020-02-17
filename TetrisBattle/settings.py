@@ -16,7 +16,7 @@ FPS = 100
 SCREENWIDTH  = 800
 SCREENHEIGHT = 600
 
-SPEED_UP = 1
+SPEED_UP = 10
 
 MAX_TIME = 130000
 
@@ -112,10 +112,10 @@ PIECES_DICT = {
 
 PIECE_NUM2TYPE = {1: 'I', 2: 'O', 3: 'J', 4: 'L', 5: 'Z', 6: 'S', 7: 'T', 8: 'G'}
 PIECE_TYPE2NUM = {val: key for key, val in PIECE_NUM2TYPE.items()}
-POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
+# POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
 
-# POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
-# POSSIBLE_KEYS = ['L', 'L', 'J', 'J', 'J', 'L', 'L']
+POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
+# POSSIBLE_KEYS = ['L', 'L', 'L', 'L', 'L', 'L', 'L']
 
 # POSSIBLE_KEYS = ['I', 'I', 'I', 'I', 'O', 'O', 'O']
 

@@ -56,6 +56,29 @@ class TetrisGame:
         images = load_imgs()
         self.renderer = Renderer(self.screen, images)
 
+        # whether to fix the speed cross device. Do this by 
+        # fix the FPS to FPS (100)
+        self._fix_speed_cross_device = True
+        self._fix_fps = FPS
+
+    def update_time(_time):
+        # update the time clock and return the running state
+
+        if self._fix_speed_cross_device:
+            time_per_while = 1 / self._fix_fps
+        else:
+            time_per_while = timer2p.tick()
+        
+        running = True
+
+        if time >= 0:                
+            time -= time_per_while * SPEED_UP
+        else:
+            time = 0
+            running = False
+
+        return time, running
+
     def play(self):
         page = "menu"
         myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
@@ -369,13 +392,10 @@ class TetrisGameDouble(TetrisGame):
                     running = False
                     winner = opponent["tetris"].get_id()
 
-                if time >= 0:
-                    time -= timer2p.tick() * SPEED_UP
-                else:
-                    time = 0
-                    winner = Judge.who_win(tetris, opponent["tetris"])
+                time, running = self.update_time(time)
 
-                    running = False
+                if not running:
+                    winner = Judge.who_win(tetris, opponent["tetris"])
 
             self.renderer.drawTime2p(time)
 
@@ -536,11 +556,7 @@ class TetrisGameSingle(TetrisGame):
 
             # pygame.display.update(r)
 
-            if time >= 0:
-                time -= timer2p.tick() * SPEED_UP
-            else:
-                time = 0
-                running = False
+            time, running = self.update_time(time)
 
             self.renderer.drawTime2p(time)
 

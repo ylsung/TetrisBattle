@@ -115,7 +115,8 @@ PIECE_TYPE2NUM = {val: key for key, val in PIECE_NUM2TYPE.items()}
 # POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
 
 POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
-# POSSIBLE_KEYS = ['L', 'L', 'L', 'L', 'L', 'L', 'L']
+# POSSIBLE_KEYS = ['L', 'L', 'J', 'J', 'J', 'L', 'L']
+
 
 # POSSIBLE_KEYS = ['I', 'I', 'I', 'I', 'O', 'O', 'O']
 

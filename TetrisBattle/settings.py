@@ -16,7 +16,7 @@ FPS = 100
 SCREENWIDTH  = 800
 SCREENHEIGHT = 600
 
-SPEED_UP = 1
+SPEED_UP = 10
 
 MAX_TIME = 130000
 
@@ -116,6 +116,7 @@ PIECE_TYPE2NUM = {val: key for key, val in PIECE_NUM2TYPE.items()}
 
 POSSIBLE_KEYS = ['I', 'O', 'L', 'L', 'L', 'I', 'O']
 # POSSIBLE_KEYS = ['L', 'L', 'J', 'J', 'J', 'L', 'L']
+
 
 # POSSIBLE_KEYS = ['I', 'I', 'I', 'I', 'O', 'O', 'O']
 

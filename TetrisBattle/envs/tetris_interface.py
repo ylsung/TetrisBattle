@@ -456,6 +456,8 @@ class TetrisSingleInterface(TetrisInterface):
                                'n_used_block': tetris.n_used_block}
                                
 
+            print(infos)
+
         reward = self.reward_func(infos)
 
         self.total_reward += reward

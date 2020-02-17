@@ -69,12 +69,15 @@ class TetrisGame:
         else:
             time_per_while = timer2p.tick()
         
+        running = True
+
         if time >= 0:                
             time -= time_per_while * SPEED_UP
         else:
             time = 0
             running = False
 
+        return time, running
 
     def play(self):
         page = "menu"
@@ -389,13 +392,10 @@ class TetrisGameDouble(TetrisGame):
                     running = False
                     winner = opponent["tetris"].get_id()
 
-                if time >= 0:
-                    time -= timer2p.tick() * SPEED_UP
-                else:
-                    time = 0
-                    winner = Judge.who_win(tetris, opponent["tetris"])
+                time, running = self.update_time(time)
 
-                    running = False
+                if not running:
+                    winner = Judge.who_win(tetris, opponent["tetris"])
 
             self.renderer.drawTime2p(time)
 
@@ -440,11 +440,11 @@ class TetrisGameSingle(TetrisGame):
         super(TetrisGameSingle, self).__init__()
         self.num_players = 1
 
-        # self.last_infos = {'height_sum': 0, 
-        #                    'diff_sum': 0,
-        #                    'max_height': 0,
-        #                    'holes': 0,
-        #                    'n_used_block': 0}
+        self.last_infos = {'height_sum': 0, 
+                           'diff_sum': 0,
+                           'max_height': 0,
+                           'holes': 0,
+                           'n_used_block': 0}
 
     def start(self, myClock, timer2p):#parameters are FP/s rate and timer countdown
     ################################################################################
@@ -523,28 +523,28 @@ class TetrisGameSingle(TetrisGame):
 
                 tetris.new_block()
 
-            # infos = {'is_fallen': tetris.is_fallen}
+            infos = {'is_fallen': tetris.is_fallen}
 
-            # if tetris.is_fallen:
-            #     height_sum, diff_sum, max_height, holes = get_infos(tetris.get_board())
+            if tetris.is_fallen:
+                height_sum, diff_sum, max_height, holes = get_infos(tetris.get_board())
 
-            #     # store the different of each information due to the move
-            #     infos['height_sum'] = height_sum - self.last_infos['height_sum']
-            #     infos['diff_sum'] =  diff_sum - self.last_infos['diff_sum']
-            #     infos['max_height'] =  max_height - self.last_infos['max_height']
-            #     infos['holes'] =  holes - self.last_infos['holes'] 
-            #     infos['n_used_block'] =  tetris.n_used_block - self.last_infos['n_used_block']
-            #     infos['is_fallen'] =  tetris.is_fallen 
-            #     infos['scores'] =  scores 
-            #     infos['cleared'] =  tetris.cleared
+                # store the different of each information due to the move
+                infos['height_sum'] = height_sum - self.last_infos['height_sum']
+                infos['diff_sum'] =  diff_sum - self.last_infos['diff_sum']
+                infos['max_height'] =  max_height - self.last_infos['max_height']
+                infos['holes'] =  holes - self.last_infos['holes'] 
+                infos['n_used_block'] =  tetris.n_used_block - self.last_infos['n_used_block']
+                infos['is_fallen'] =  tetris.is_fallen 
+                infos['scores'] =  scores 
+                infos['cleared'] =  tetris.cleared
                 
-            #     self.last_infos = {'height_sum': height_sum,
-            #                     'diff_sum': diff_sum,
-            #                     'max_height': max_height,
-            #                     'holes': holes,
-            #                     'n_used_block': tetris.n_used_block}
+                self.last_infos = {'height_sum': height_sum,
+                                'diff_sum': diff_sum,
+                                'max_height': max_height,
+                                'holes': holes,
+                                'n_used_block': tetris.n_used_block}
 
-            #     print(infos)
+                print(infos)
 
             self.renderer.drawGameScreen(tetris)
 
@@ -556,11 +556,7 @@ class TetrisGameSingle(TetrisGame):
 
             # pygame.display.update(r)
 
-            if time >= 0:
-                time -= timer2p.tick() * SPEED_UP
-            else:
-                time = 0
-                running = False
+            time, running = self.update_time(time)
 
             self.renderer.drawTime2p(time)
 

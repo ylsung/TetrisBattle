@@ -149,6 +149,11 @@ class TetrisInterface(abc.ABC):
         self.num_players = -1
         self.now_player = -1
 
+        # whether to fix the speed cross device. Do this by 
+        # fix the FPS to FPS (100)
+        self._fix_speed_cross_device = True
+        self._fix_fps = FPS
+
     @property 
     def action_meaning(self):
         return self._action_meaning
@@ -204,7 +209,21 @@ class TetrisInterface(abc.ABC):
         # define the reward function based on the given infos
         raise NotImplementedError
 
-    
+    def update_time(self, _time):
+        # update the time clock and return the running state
+        
+        if self._fix_speed_cross_device:
+            time_per_while = 1 / self._fix_fps * 1000 # transform to milisecond
+        else:
+            time_per_while = self.timer2p.tick()      # milisecond
+
+        if _time >= 0:                
+            _time -= time_per_while * SPEED_UP
+        else:
+            _time = 0
+
+        return _time
+
     def task_before_action(self, player):
         # set up the clock and curr_repeat_time
         # set the action to last_action if curr_repeat_time != 0
@@ -415,10 +434,9 @@ class TetrisSingleInterface(TetrisInterface):
 
         self.renderer.drawByName("transparent", *opponent["pos"]["transparent"])
 
-        if self.time >= 0:
-            self.time -= self.timer2p.tick() * SPEED_UP
-        else:
-            self.time = 0
+        self.time = self.update_time(self.time)
+
+        if self.time == 0:
             reward_notdie = 0.3 * self.total_reward
             end = 1
 
@@ -456,7 +474,7 @@ class TetrisSingleInterface(TetrisInterface):
                                'n_used_block': tetris.n_used_block}
                                
 
-            print(infos)
+            # print(infos)
 
         reward = self.reward_func(infos)
 
@@ -595,12 +613,10 @@ class TetrisDoubleInterface(TetrisInterface):
             end = 1
             winner = opponent["tetris"].get_id()
 
-        if self.time >= 0:
-            self.time -= self.timer2p.tick() * SPEED_UP
-        else:
-            self.time = 0
-            winner = Judge.who_win(tetris, opponent["tetris"])
+        self.time = self.update_time(self.time)
 
+        if self.time == 0:
+            winner = Judge.who_win(tetris, opponent["tetris"])
             end = 1
 
         self.renderer.drawTime2p(self.time)

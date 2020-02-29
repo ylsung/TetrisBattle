@@ -289,7 +289,7 @@ class Renderer(object):
         self.screen.blit(self.images["timeback"], (280, 63)) #background
         #minutes
         self.screen.blit(self.images["numbers"][int(minutes / 10)], (x, y))
-        self.screen.blit(self.images["numbers"][int(minutes)], (x + 27, y))
+        self.screen.blit(self.images["numbers"][int(minutes % 10)], (x + 27, y))
         self.screen.blit(self.images["decimal"], (x + 56, y))  #graphics
         self.screen.blit(self.images["decimal"], (x + 56, y + 14))  #graphics
         self.screen.blit(self.images["decimal"], (x + 127, y + 14)) #graphics

@@ -5,6 +5,7 @@ from TetrisBattle.settings import *
 import time as t
 
 from TetrisBattle.renderer import Renderer
+from TetrisBattle.sound_manager import SoundManager
 
 from TetrisBattle.tetris import Tetris, Player, Judge, collideDown, collide, collideLeft, collideRight, \
     hardDrop, freeze, get_infos
@@ -20,7 +21,7 @@ POS_LIST = [
         'big_ko': (44, 235),
         'ko': (140, 233),
         'transparent': (110, 135),
-        'gamescreen': (0, 0), 
+        'gamescreen': (0, 0),
         'attack_clean': (298, 140, 3, 360),
         'attack_alarm': (298, 481, 3, 18),
         'you_win': (120, 230),
@@ -36,7 +37,7 @@ POS_LIST = [
         'big_ko': (426, 235),
         'ko': (527, 233),
         'transparent': (494, 135),
-        'gamescreen': (0, 0), 
+        'gamescreen': (0, 0),
         'attack_clean': (680, 140, 3, 360),
         'attack_alarm': (680, 481, 3, 18),
         'you_win': (520, 230),
@@ -49,37 +50,47 @@ class TetrisGame:
     #will be used for choosing what map you want to play on
 
     def __init__(self):
-        # import os 
+        # import os
         # os.environ["SDL_VIDEODRIVER"] = "dummy"
-        # SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT), pygame.FULLSCREEN) # SCREEN is 800*600 
-        self.screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # SCREEN is 800*600 
+        # SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT), pygame.FULLSCREEN) # SCREEN is 800*600
+        self.screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # SCREEN is 800*600
         images = load_imgs()
         self.renderer = Renderer(self.screen, images)
+        self.sound_manager = SoundManager.get_instance()
 
-        self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s) 
+        self.myClock = pygame.time.Clock() # this will be used to set the FPS(frames/s)
 
         self.timer2p = pygame.time.Clock() # this will be used for counting down time in our game
 
-        # whether to fix the speed cross device. Do this by 
+        # whether to fix the speed cross device. Do this by
         # fix the FPS to FPS (100)
         self._fix_speed_cross_device = True
         self._fix_fps = FPS
 
     def update_time(self, _time, running):
         # update the time clock and return the running state
-        
+
         if self._fix_speed_cross_device:
             time_per_while = 1 / self._fix_fps * 1000 # transform to milisecond
         else:
             time_per_while = self.timer2p.tick()      # milisecond
 
-        if _time >= 0:                
+        if _time >= 0:
             _time -= time_per_while * SPEED_UP
         else:
             _time = 0
             running = False
 
         return _time, running
+
+    def game_init(self):
+        pass
+
+    def countdown(self):
+        channel = self.sound_manager.play_sound("count_down")
+        if channel != None:
+            while channel.get_busy():
+                t.sleep(1 / self._fix_fps)
 
     def play(self):
         page = "menu"
@@ -90,11 +101,11 @@ class TetrisGame:
             if page == "start":
                 page = self.start()
             if page == "viewmap":
-                page = self.viewmap()    
+                page = self.viewmap()
             if page == "instructions":
-                page = self.instructions()    
+                page = self.instructions()
             # if page == "pygame.quit":
-            #     page = (page)    
+            #     page = (page)
             # if page == "credits":
             #     page = self.credit(page)
         # pygame.quit()
@@ -102,28 +113,28 @@ class TetrisGame:
     def setmap(self):
         running = True
         # loading images
-        
+
         # defining rectangles for collision checking
         map1 = pygame.Rect(155, 75, 200, 200)
         map2 = pygame.Rect(439, 75, 200, 200)
         map3 = pygame.Rect(155, 309, 200, 200)
         map4 = pygame.Rect(439, 309, 200, 200)
         buttons = [map1, map2, map3, map4]# preparing a buttons and names list to be zipped together
-        names = ["none", "classic", "comboking", "lunchbox"]# 
+        names = ["none", "classic", "comboking", "lunchbox"]#
         self.renderer.drawByName("back1", 0, 0) # IMAGES["back1"] is the main background
         while running:
             mpos = pygame.mouse.get_pos()
             mb = pygame.mouse.get_pressed()
-            for evnt in pygame.event.get():          
+            for evnt in pygame.event.get():
                 if evnt.type == pygame.QUIT:
                     running = False
 
-            for b, n in zip(buttons, names): # zipping buttons and names together       
-                if b.collidepoint(mpos):   # for very easy collision checking            
+            for b, n in zip(buttons, names): # zipping buttons and names together
+                if b.collidepoint(mpos):   # for very easy collision checking
                     if mb[0] == 1:
                         return n # return the name of the map chosen
 
-            # this chunk of code is just making pretty pictures       
+            # this chunk of code is just making pretty pictures
             if map1.collidepoint(mpos):
                 self.renderer.drawByName("outline", 149, 64)
             elif map2.collidepoint(mpos):
@@ -134,9 +145,9 @@ class TetrisGame:
                 self.renderer.drawByName("outline", 149, 301)
             else:
                 self.renderer.drawByName("back1", 0, 0) # keeping it fresh
-            
+
             pygame.display.flip() #necessities
-    #gridchoice=""    
+    #gridchoice=""
 
     #################################################################################
     def viewmap(self):#viewmap function
@@ -148,11 +159,11 @@ class TetrisGame:
         map3 = pygame.Rect(155, 309, 200, 200)
         map4 = pygame.Rect(439, 309, 200, 200)
         buttons = [map1, map2, map3, map4]#preparing a buttons and names list to be zipped together
-        names = ["none", "classic", "comboking", "lunchbox"]# 
+        names = ["none", "classic", "comboking", "lunchbox"]#
         self.renderer.drawByName("back1", 0, 0) # back1 is the main background
         while running:
 
-            for evnt in pygame.event.get():          
+            for evnt in pygame.event.get():
                 if evnt.type == pygame.QUIT:
                     running = False
 
@@ -160,12 +171,12 @@ class TetrisGame:
             mb = pygame.mouse.get_pressed()
             #print mpos
 
-            #for b,n in zip(buttons,names): #zipping buttons and names together       
-                #if b.collidepoint(mpos):   #for very easy collision checking            
+            #for b,n in zip(buttons,names): #zipping buttons and names together
+                #if b.collidepoint(mpos):   #for very easy collision checking
                     #if mb[0]==1:
-                        
 
-            #this chunk of code is just making pretty pictures       
+
+            #this chunk of code is just making pretty pictures
             if map1.collidepoint(mpos):
                 self.renderer.drawByName("outline", 149, 64)
             elif map2.collidepoint(mpos):
@@ -187,7 +198,7 @@ class TetrisGame:
         self.renderer.drawByName("back2", 0, 0)
         #SCREEN.blit(inst,(173,100))
         while running:
-            for evnt in pygame.event.get():          
+            for evnt in pygame.event.get():
                 if evnt.type == pygame.QUIT:
                     running = False
             pygame.display.flip()
@@ -198,10 +209,10 @@ class TetrisGame:
     def menu(self, page):
         running = True
         button1 = pygame.Rect(320, 204, 146, 50)#start rect
-        buttons = [pygame.Rect(325, y * 42 + 275, 135, 30) for y in range(3)]#other three rects 
+        buttons = [pygame.Rect(325, y * 42 + 275, 135, 30) for y in range(3)]#other three rects
         vals = ["viewmap", "instructions", "exit"]#values of other three rects
-        
-        
+
+
         self.renderer.drawByName("intro", 0, 0)
         pygame.display.set_caption("Tetris Battle", "tetris battle")
         while running:
@@ -221,7 +232,7 @@ class TetrisGame:
                     #print r,v
                     if mb[0] == 1:
                         return v # page to go to
-           
+
             if button1.collidepoint(mpos):
                 self.renderer.drawByName("startbutton", 319, 207)
                 if mb[0] == 1:
@@ -238,15 +249,15 @@ class TetrisGame:
                     return "exit" # quitting the game
             else:
                 self.renderer.drawByName("intro", 0, 0) # reblit the background
-            
+
             #draw.rect(SCREEN,(0,0,0),button1,2)
-            self.myClock.tick(FPS)            
+            self.myClock.tick(FPS)
             pygame.display.flip()
 
     #main game function
     def start(self):
         raise NotImplementedError
-    
+
 
 class TetrisGameDouble(TetrisGame):
 
@@ -256,14 +267,13 @@ class TetrisGameDouble(TetrisGame):
 
     def start(self):#parameters are FP/s rate and timer countdown
     ################################################################################
-        
+
         gridchoice = self.setmap()#calling the setmap function for a choice of grid
         self.timer2p.tick()
         #the code below is what happens when you set a map
         #different maps = differnet grids
-               
-        pygame.init() #for music
-        battlemusic = pygame.mixer.Sound(MUSIC_PATH)#importing sound file
+
+        self.game_init()
 
         #SCREEN=pygame.display.set_mode((800,600))
         running = True #necessity
@@ -309,10 +319,16 @@ class TetrisGameDouble(TetrisGame):
 
         winner = 0
         force_quit = 0
+
+        self.renderer.drawGameScreen(None)
+        pygame.display.flip()
+
+        self.countdown()
+
         #main loop
         while running:
-            # battlemusic.play()#plays music
-            
+            self.sound_manager.bgm_loop(True)
+
             for tetris_dict in tetris_list:
                 tetris_dict["tetris"].natural_down()
 
@@ -322,7 +338,7 @@ class TetrisGameDouble(TetrisGame):
                     force_quit = 1
 
                 for tetris_dict in tetris_list:
-                    tetris_dict["tetris"].trigger(evt)
+                   tetris_dict["tetris"].trigger(evt)
 
             for tetris_dict in tetris_list:
                 tetris_dict["tetris"].move()
@@ -344,9 +360,9 @@ class TetrisGameDouble(TetrisGame):
                     self.renderer.drawBack2Back(tetris, *pos["back2back"])
 
                     if tetris.check_KO():
-                        
+
                         self.renderer.drawBoard(tetris, *pos["board"])
-                        
+
                         opponent["tetris"].update_ko()
 
                         tetris.clear_garbage()
@@ -368,19 +384,19 @@ class TetrisGameDouble(TetrisGame):
                 tetris.increment_timer()
 
                 if tetris.attacked == 0:
-                    pygame.draw.rect(self.screen, (30, 30, 30), pos["attack_clean"]) 
+                    pygame.draw.rect(self.screen, (30, 30, 30), pos["attack_clean"])
 
                 if tetris.attacked != 0:
-                    
+
                     for j in range(tetris.attacked):
                         pos_attack_alarm = list(pos["attack_alarm"])
                         # modified the y axis of the rectangle, according to the strength of attack
                         pos_attack_alarm[1] = pos_attack_alarm[1] - 18 * j
-                        pygame.draw.rect(self.screen, (255, 0, 0), pos_attack_alarm) 
+                        pygame.draw.rect(self.screen, (255, 0, 0), pos_attack_alarm)
 
                 if tetris.KO > 0:
                     self.renderer.drawKO(tetris.KO, *pos["big_ko"])
-                    
+
                 self.renderer.drawScreen(tetris, *pos["drawscreen"])
 
                 if Judge.check_ko_win(tetris, max_ko=3):
@@ -398,10 +414,11 @@ class TetrisGameDouble(TetrisGame):
 
             self.renderer.drawTime2p(time)
 
-            self.myClock.tick(FPS)   
+            self.myClock.tick(FPS)
             pygame.display.flip()
 
         if force_quit:
+            self.sound_manager.bgm_loop(False)
             return "menu"
 
 
@@ -429,6 +446,8 @@ class TetrisGameDouble(TetrisGame):
 
         freeze(2.0)
 
+        self.sound_manager.bgm_loop(False)
+
         return "menu"
 
         # pygame.quit()
@@ -439,7 +458,7 @@ class TetrisGameSingle(TetrisGame):
         super(TetrisGameSingle, self).__init__()
         self.num_players = 1
 
-        self.last_infos = {'height_sum': 0, 
+        self.last_infos = {'height_sum': 0,
                            'diff_sum': 0,
                            'max_height': 0,
                            'holes': 0,
@@ -484,13 +503,13 @@ class TetrisGameSingle(TetrisGame):
 
         opponent_pos = POS_LIST[-1]
         # print("213")
-        
+
         #main loop
         force_quit = 0
         kk = 0
         while running:
             # battlemusic.play()#plays music
-            
+
             tetris.natural_down()
 
             for evt in pygame.event.get():
@@ -512,9 +531,9 @@ class TetrisGameSingle(TetrisGame):
                 self.renderer.drawBack2Back(tetris, *pos["back2back"])
 
                 if tetris.check_KO():
-                    
+
                     self.renderer.drawBoard(tetris, *pos["board"])
-                    
+
                     tetris.clear_garbage()
 
                     pygame.display.flip()
@@ -531,12 +550,12 @@ class TetrisGameSingle(TetrisGame):
                 infos['height_sum'] = height_sum - self.last_infos['height_sum']
                 infos['diff_sum'] =  diff_sum - self.last_infos['diff_sum']
                 infos['max_height'] =  max_height - self.last_infos['max_height']
-                infos['holes'] =  holes - self.last_infos['holes'] 
+                infos['holes'] =  holes - self.last_infos['holes']
                 infos['n_used_block'] =  tetris.n_used_block - self.last_infos['n_used_block']
-                infos['is_fallen'] =  tetris.is_fallen 
-                infos['scores'] =  scores 
+                infos['is_fallen'] =  tetris.is_fallen
+                infos['scores'] =  scores
                 infos['cleared'] =  tetris.cleared
-                
+
                 self.last_infos = {'height_sum': height_sum,
                                 'diff_sum': diff_sum,
                                 'max_height': max_height,
@@ -561,7 +580,7 @@ class TetrisGameSingle(TetrisGame):
 
             # time goes until it hits zero
             # when it hits zero return endgame SCREEN
-            self.myClock.tick(FPS)   
+            self.myClock.tick(FPS)
             pygame.display.flip()
 
         if force_quit:

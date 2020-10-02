@@ -67,6 +67,19 @@ MAX_COMBO = 10
 # MUSIC_PATH
 
 MUSIC_PATH = os.path.join(ROOT, "assets/tetris sounds/battlemusic.wav")
+sound_tracks_path = {
+    "count_down": os.path.join(ROOT, "assets/tetris sounds/count_down.wav"),
+    "rotate": os.path.join(ROOT, "assets/tetris sounds/rotate.wav"),
+    "harddrop": os.path.join(ROOT, "assets/tetris sounds/harddrop.wav"),
+    "hold": os.path.join(ROOT, "assets/tetris sounds/hold.wav"),
+
+    "combo1": os.path.join(ROOT, "assets/tetris sounds/combo1.wav"),
+    "combo2": os.path.join(ROOT, "assets/tetris sounds/combo2.wav"),
+    "combo3": os.path.join(ROOT, "assets/tetris sounds/combo3.wav"),
+    "combo4": os.path.join(ROOT, "assets/tetris sounds/combo4.wav"),
+    "combo5": os.path.join(ROOT, "assets/tetris sounds/combo5.wav"),
+    "combo6": os.path.join(ROOT, "assets/tetris sounds/combo6.wav"),
+}
 
 # BLOCKS
 

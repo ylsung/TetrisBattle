@@ -11,7 +11,7 @@ class Renderer(object):
 
     # this function draws the combo number, return True if sucessfully draw
     def drawCombo(self, tetris, sx, sy):
-        
+
         combos = self.images["combos"]
         if tetris.combo > 0:
             r = self.screen.blit(combos[min(tetris.combo, MAX_COMBO) - 1], (sx, sy)) #blits the combo number
@@ -32,7 +32,7 @@ class Renderer(object):
     def drawTetris(self, tetris, sx, sy):
         if tetris.tetris:
             r = self.screen.blit(self.images["tetris_img"], (sx, sy))
-            
+
             pygame.display.update(r)
 
             tetris.LAST_TETRIS_DRAW_TIME = 0
@@ -47,7 +47,7 @@ class Renderer(object):
     def drawTspin(self, tetris, sx, sy):
         if tetris.tspin:
             r = self.screen.blit(self.images["tspin_double_img"], (sx, sy))
-            
+
             pygame.display.update(r)
 
             tetris.LAST_TSPIN_DRAW_TIME = 0
@@ -60,7 +60,7 @@ class Renderer(object):
     def drawBack2Back(self, tetris, sx, sy):
         if tetris.pre_back2back and (tetris.tspin or tetris.tetris):
             r = self.screen.blit(self.images["back2back_img"], (sx, sy))
-            
+
             pygame.display.update(r)
 
             tetris.LAST_BACK2BACK_DRAW_TIME = 0
@@ -71,6 +71,10 @@ class Renderer(object):
         return False
 
     def drawGameScreen(self, tetris):
+        if tetris == None:
+            self.screen.blit(self.images["gamescreen"], (0, 0))
+            return
+
         if tetris.LAST_COMBO_DRAW_TIME > COMBO_COUNT_FREQ and tetris.check_combo():
             self.screen.blit(self.images["gamescreen"], (0, 0))
             tetris.oldcombo = tetris.combo
@@ -88,12 +92,12 @@ class Renderer(object):
             tetris.back2back_drawing = 0
             # tetris.combo += 1
 
-    #drawing the actual game self.screen     
+    #drawing the actual game self.screen
     def drawScreen(self, tetris_1, sx, sy):
         self.drawHeld(tetris_1, sx - 56, sy + 23)  # draws held piece for grid1
         self.drawNext(tetris_1, sx + 206, sy + 23) # draws next piece for grid1
         self.drawNumbers(tetris_1, sx - 56, sy + 239) # draws the linessent on the self.screen for grid1
-                        
+
         #this code blits the background grid for grid1
         excess = len(tetris_1.grid[0]) - GRID_DEPTH
         # print(player_1.grid)
@@ -111,7 +115,7 @@ class Renderer(object):
             self.drawGhostPiece(tetris_1, sx, sy)
 
         #drawing the pieces
-        self.drawPiece(tetris_1, sx, sy)              
+        self.drawPiece(tetris_1, sx, sy)
         #drawing the grid
         self.drawBoard(tetris_1, sx, sy)
 
@@ -132,7 +136,7 @@ class Renderer(object):
 
             self.screen.blit(self.images["holdback"], (sx - 8, 159))
 
-            
+
             if _type == 'I':
                 for i in range(len(pos)):#if its an o piece different x and y position
                     self.screen.blit(self.images["resizepics"][_type], (sx - 5 + int(pos[i][0] * 12), sy - 6 + int(pos[i][1] * 12)))
@@ -144,10 +148,10 @@ class Renderer(object):
                 for i in range(len(pos)):#if its an i piece different x and y position
                     self.screen.blit(self.images["resizepics"][_type], (sx + int(pos[i][0] * 12), sy + int(pos[i][1] * 12)))
 
-    # drawing the next pieces 
-    def drawNext(self, tetris, sx, sy): 
+    # drawing the next pieces
+    def drawNext(self, tetris, sx, sy):
         grid, nextpieces = tetris.grid, tetris.buffer.now_list
-        for i in range(5): # 5 different pieces 
+        for i in range(5): # 5 different pieces
             pos = []
             _type = nextpieces[i].block_type()
             b = nextpieces[i].now_block()
@@ -155,16 +159,16 @@ class Renderer(object):
                 for y in range(4): #same procedure as the drawhed function
                     if b[x][y] > 0:
                         pos.append((x, y))
-            
+
             if i == 0: # position 1
-                self.screen.blit(self.images["holdback"], (sx - 1, 159))            
+                self.screen.blit(self.images["holdback"], (sx - 1, 159))
                 if _type == 'I': # i piece is different x and y pos
                     for i in range(len(pos)):
                         self.screen.blit(self.images["resizepics"][_type], (sx + 1 + int(pos[i][0] * 12), 156 + int(pos[i][1] * 12)))
                 elif _type == 'O': # o piece is different x and y pos
                     for i in range(len(pos)):
-                        self.screen.blit(self.images["resizepics"][_type], (sx + 1 + int(pos[i][0] * 12), 158 + int(pos[i][1] * 12)))                
-                else: # every other piece is the same x and y pos              
+                        self.screen.blit(self.images["resizepics"][_type], (sx + 1 + int(pos[i][0] * 12), 158 + int(pos[i][1] * 12)))
+                else: # every other piece is the same x and y pos
                     for i in range(len(pos)):
                         self.screen.blit(self.images["resizepics"][_type], (sx + 7 + int(pos[i][0] * 12), 159 + int(pos[i][1] * 12)))
 
@@ -205,7 +209,7 @@ class Renderer(object):
                 if b[x][y] > 0:
                     if GRID_WIDTH > px + x > -1 and len(grid[0]) > py + y > -1:
                         self.drawGhost(sx, sy, px + x, py + y - excess)
-                        
+
     #draws the number of lines sent
     def drawNumbers(self, tetris, sx, sy):
         grid, sent = tetris.grid, tetris.sent
@@ -276,15 +280,15 @@ class Renderer(object):
         #the ghost block piece
     def drawGhost(self, sx, sy, x, y):
         self.screen.blit(self.images["ghost"], (sx + x * 18, sy + y * 18))
-        
-            
+
+
     #the timer for the game
     def drawTime2p(self, time):
         minutes = time / 60000 #integer div for minutes
         seconds = (time / 1000) % 60 #int and mod div for sec
         milliseconds = (time / 10) % 100# int and mod div for millisec
 
-        x = 292 #position of the self.images["numbers"] 
+        x = 292 #position of the self.images["numbers"]
         y = 67
         self.screen.blit(self.images["timeback"], (280, 63)) #background
         #minutes

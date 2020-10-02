@@ -23,6 +23,8 @@ from copy import deepcopy
 import time as t
 from collections import Counter
 
+from .sound_manager import SoundManager
+
 def put_block_in_grid(grid, block, px, py):
     feasibles = block.return_pos_color(px, py)
 
@@ -52,7 +54,7 @@ def collide(grid, block, px, py):
 
         if py + pos[1] < 0:   # up
             continue
-        
+
         if grid[px + pos[0]][py + pos[1]] > 0:
             # print(px, py)
             # print(px + pos[0], py + pos[1])
@@ -121,7 +123,7 @@ def rotateCollide(grid, block, px, py):
         #     c.update({"up": 1})
 
         if 0 <= px + pos[0] <= 9 and excess <= py + pos[1] <= len(grid[0]) - 1:
-        
+
             if grid[px + pos[0]][py + pos[1]] > 0:
                 if pos[0] == left_most:
                     c.update({"left": 1})
@@ -204,7 +206,7 @@ def rotate(grid, block, px, py, _dir=1):
                     find = 1
 
     if collision != False and not find:
-        block.rotate(- _dir) 
+        block.rotate(- _dir)
 
     # print(collision)
 
@@ -231,7 +233,7 @@ def hardDrop(grid, block, px, py):
             y += 1
             if collideDown(grid, block, px, py) == True:
                 break
-        
+
     return y
 
 # this function enables you to hold a piece
@@ -242,10 +244,10 @@ def hold(block, held, _buffer):
         held = block
         block = _buffer.new_block()
 
-    # the piece switches with the held piece     
+    # the piece switches with the held piece
     else:
         block, held = held, block
-        
+
     return [block, held]
 
 def freeze(last_time):
@@ -301,7 +303,7 @@ class Piece(object):
         self._type = _type
         self.possible_shapes = possible_shapes
 
-        self.current_shape_id = 0 
+        self.current_shape_id = 0
 
     def block_type(self):
         return self._type
@@ -378,7 +380,7 @@ class Buffer(object):
 
                      now list           next list
     next piece <- [           ]   <-  [            ]
- 
+
     '''
     def new_block(self):
         out = self.now_list.pop(0)
@@ -488,43 +490,44 @@ class Tetris(object):
             self.o_grid = [[0] * GRID_DEPTH for i in range(GRID_WIDTH)]
 
         if gridchoice == "classic":
-            self.o_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0], 
+            self.o_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
         if gridchoice == "comboking":
-            self.o_grid = [[0, 0, 0, 0, 0, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], 
-                          [0, 0, 0, 0, 0, 6, 6, 6, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 4, 5], 
-                          [0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], 
-                          [0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5], 
-                          [0, 0, 0, 0, 0, 6, 6, 6, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 4, 5], 
+            self.o_grid = [[0, 0, 0, 0, 0, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                          [0, 0, 0, 0, 0, 6, 6, 6, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 4, 5],
+                          [0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                          [0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5],
+                          [0, 0, 0, 0, 0, 6, 6, 6, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 4, 5],
                           [0, 0, 0, 0, 0, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]]
 
         if gridchoice == "lunchbox":
-            self.o_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5, 5, 5, 5, 5, 1], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 2, 2, 2, 2, 2, 2, 5, 1], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 2, 4, 4, 4, 4, 2, 5, 1], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 2, 4, 4, 4, 4, 2, 5, 6], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 2, 2, 2, 2, 2, 2, 5, 6], 
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6], 
+            self.o_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5, 5, 5, 5, 5, 1],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 2, 2, 2, 2, 2, 2, 5, 1],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 2, 4, 4, 4, 4, 2, 5, 1],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 2, 4, 4, 4, 4, 2, 5, 6],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 2, 2, 2, 2, 2, 2, 5, 6],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]]
 
 
         self.player = player
+        self.sound_manager = SoundManager.get_instance()
 
         self.reset()
 
@@ -550,7 +553,7 @@ class Tetris(object):
         self.tetris = 0
 
         #for "KO"
-        self._KO = 0 
+        self._KO = 0
 
         self._attacked = 0
         self._is_fallen = 0
@@ -615,11 +618,11 @@ class Tetris(object):
     @property
     def attacked(self):
         return self._attacked
-    
+
     def get_grid(self):
         excess = len(self.grid[0]) - GRID_DEPTH
         return_grids = np.zeros(shape=(GRID_WIDTH, GRID_DEPTH), dtype=np.float32)
-        
+
         block, px, py = self.block, self.px, self.py
         excess = len(self.grid[0]) - GRID_DEPTH
         b = block.now_block()
@@ -636,7 +639,7 @@ class Tetris(object):
                     # draw ghost grid
                     if -1 < px + x < 10 and -1 < py + y + add_y - excess < 20:
                         return_grids[px + x][py + y + add_y - excess] = 0.3
-                        
+
                     if -1 < px + x < 10 and -1 < py + y - excess < 20:
                         return_grids[px + x][py + y - excess] = 0.7
 
@@ -645,7 +648,7 @@ class Tetris(object):
             informations[PIECE_TYPE2NUM[self.held.block_type()] - 1][0] = 1
 
         nextpieces = self.buffer.now_list
-        for i in range(5): # 5 different pieces 
+        for i in range(5): # 5 different pieces
             _type = nextpieces[i].block_type()
             informations[PIECE_TYPE2NUM[_type] - 1][i + 1] = 1
         # index start from 6
@@ -663,7 +666,7 @@ class Tetris(object):
     def get_board(self):
         excess = len(self.grid[0]) - GRID_DEPTH
         return_grids = np.zeros(shape=(GRID_WIDTH, GRID_DEPTH), dtype=np.float32)
-        
+
         block, px, py = self.block, self.px, self.py
         excess = len(self.grid[0]) - GRID_DEPTH
         # b = block.now_block()
@@ -685,7 +688,7 @@ class Tetris(object):
         for i in range(0, len(self.grid)):  # Select a column
             for j in range(0, len(self.grid[0])):  # Search down starting from the top of the board
                 if int(self.grid[i][j]) > 0:  # Is the cell occupied?
-                    max_height = max(max_height, len(self.grid[0]) - j) 
+                    max_height = max(max_height, len(self.grid[0]) - j)
                     break
         return max_height
 
@@ -719,10 +722,12 @@ class Tetris(object):
             if evt.key == self.player.rotate_right and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=1)
                 self.LAST_ROTATE_TIME = 0
+                self.sound_manager.play_sound('rotate')
 
             if evt.key == self.player.rotate_left and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=-1)
                 self.LAST_ROTATE_TIME = 0
+                self.sound_manager.play_sound('rotate')
 
             if evt.key == self.player.drop: # harddrop
                 y = hardDrop(self.grid, self.block, self.px, self.py) # parameters
@@ -731,8 +736,9 @@ class Tetris(object):
                 # self.stopcounter = COLLIDE_DOWN_COUNT
                 # self.LAST_FALL_DOWN_TIME = -FALL_DOWN_FREQ
                 self.LAST_FALL_DOWN_TIME = FALL_DOWN_FREQ
+                self.sound_manager.play_sound('harddrop')
 
-            if evt.key == self.player.hold: #holding 
+            if evt.key == self.player.hold: #holding
 
                 if not self.isholded:
 
@@ -740,6 +746,7 @@ class Tetris(object):
                     self.held.reset()
                     self.reset_pos()
                     self.isholded = 1
+                    self.sound_manager.play_sound('hold')
 
             if evt.key == self.player.right:
                 self.pressedRight = True
@@ -761,12 +768,14 @@ class Tetris(object):
             if evt.key == self.player.down:
                 self.pressedDown = False
 
+        return 'none'
+
     # move function
     # when respective buttons are pressed
     def move(self):
         # if keys[self.right]:
         if self.pressedRight and self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
-            if collideRight(self.grid, self.block, self.px, self.py) == False:    
+            if collideRight(self.grid, self.block, self.px, self.py) == False:
                 self.LAST_MOVE_SHIFT_TIME = 0
 
                 # self.block.move_right()
@@ -804,7 +813,7 @@ class Tetris(object):
 
         return False
 
-        # if self.stopcounter >= COLLIDE_DOWN_COUNT: # adds adequate delay  
+        # if self.stopcounter >= COLLIDE_DOWN_COUNT: # adds adequate delay
         #     if block_in_grid(self.grid, self.block):
         #         self.is_fallen = 1
         #         return True
@@ -831,7 +840,7 @@ class Tetris(object):
 
             scores += combo_scores
 
-            # 2 line tspin 
+            # 2 line tspin
             if tspin and cleared == 2:
                 scores += 3
 
@@ -861,15 +870,30 @@ class Tetris(object):
                 for i in range(GRID_WIDTH):
                     del self.grid[i][y] # deletes cleared lines
                     self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
-                        
+
         if cleared >= 1: # for sending lines
+            self.sound_manager.play_sound('clear')
             self.combo += 1
+
+            if self.combo == 1:
+                self.sound_manager.play_sound('combo1')
+            elif self.combo == 2:
+                self.sound_manager.play_sound('combo2')
+            elif self.combo == 3:
+                self.sound_manager.play_sound('combo3')
+            elif self.combo == 4:
+                self.sound_manager.play_sound('combo4')
+            elif self.combo == 5:
+                self.sound_manager.play_sound('combo5')
+            elif self.combo >= 6:
+                self.sound_manager.play_sound('combo6')
+
             if cleared == 4: # a tetris
                 self.tetris = 1
             else:
                 self.tetris = 0
 
-            self.pre_back2back = self.now_back2back   
+            self.pre_back2back = self.now_back2back
         else:
             self.combo = -1
             self.tetris = 0
@@ -894,10 +918,8 @@ class Tetris(object):
         self.build_garbage(self.grid, real_attacked)
 
         self._attacked = 0
-        
-        return scores
 
-        # return scores
+        return scores
 
     def check_KO(self):
         is_ko = False
@@ -910,7 +932,7 @@ class Tetris(object):
                 break
 
         return is_ko
-        
+
     def clear_garbage(self):
         garbage = 0
         # excess = len(grid[0]) - GRID_DEPTH
@@ -923,7 +945,7 @@ class Tetris(object):
 
     def build_garbage(self, grid, attacked):
         garbage_size = min(attacked, GRID_DEPTH)
-        for y in range(0, garbage_size):    
+        for y in range(0, garbage_size):
             for i in range(GRID_WIDTH):
                 # del player.grid[i][y] # deletes top of grid
                 grid[i] = grid[i] + [8] # adds garbage lines at the bottom

@@ -320,10 +320,10 @@ class TetrisGameDouble(TetrisGame):
         winner = 0
         force_quit = 0
 
-        self.renderer.drawGameScreen(None)
-        pygame.display.flip()
+        # self.renderer.drawGameScreen(None)
+        # pygame.display.flip()
 
-        self.countdown()
+        # self.countdown()
 
         #main loop
         while running:

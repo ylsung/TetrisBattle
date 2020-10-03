@@ -1,9 +1,9 @@
-from TetrisBattle.envs.tetris_single_env import TetrisSingleEnv
+from TetrisBattle.envs.tetris_env import TetrisSingleEnv
 
 
 if __name__ == "__main__":
 
-    env = TetrisSingleEnv(gridchoice="none", obs_type="grid", mode="rgb_array")
+    env = TetrisSingleEnv(gridchoice="none", obs_type="grid", mode="human")
 
     ob = env.reset()
 

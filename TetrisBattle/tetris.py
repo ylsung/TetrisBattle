@@ -484,7 +484,7 @@ class Judge(object):
                 return tetris_1.get_id() # no UI of draw
 
 class Tetris(object):
-    def __init__(self, player, gridchoice):
+    def __init__(self, player, gridchoice, training=False):
 
         if gridchoice == "none":
             self.o_grid = [[0] * GRID_DEPTH for i in range(GRID_WIDTH)]
@@ -528,6 +528,9 @@ class Tetris(object):
 
         self.player = player
         self.sound_manager = SoundManager.get_instance()
+
+        if training == True:
+            self.sound_manager.mute()
 
         self.reset()
 
@@ -618,6 +621,39 @@ class Tetris(object):
     @property
     def attacked(self):
         return self._attacked
+
+    def get_diff_grid(self):
+        excess = len(self.grid[0]) - GRID_DEPTH
+        return_grids = np.zeros(shape=(GRID_WIDTH, GRID_DEPTH), dtype=np.float32)
+
+        block, px, py = self.block, self.px, self.py
+        excess = len(self.grid[0]) - GRID_DEPTH
+        b = block.now_block()
+
+        for i in range(len(self.grid)):
+            return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+        return_grids[return_grids > 0] = 1
+
+        diff_grid = np.zeros(shape=(GRID_WIDTH), dtype=np.float32)
+        for col in range(return_grids.shape[0]):
+            for row in range(return_grids.shape[1]):
+                if return_grids[col, row] >= 1:
+                    diff_grid[col] = row - py
+
+        informations = np.zeros(shape=((len(PIECE_NUM2TYPE) - 1)*2 + 2), dtype=np.float32)
+        # current block
+        informations[PIECE_TYPE2NUM[self.block.block_type()] - 1] = 1
+
+        # hold block
+        if self.held != None:
+            informations[len(PIECE_NUM2TYPE) - 1 + PIECE_TYPE2NUM[self.held.block_type()] - 1] = 1
+    
+        informations[len(PIECE_NUM2TYPE) - 1 + 0] = px
+        informations[len(PIECE_NUM2TYPE) - 1 + 1] = py
+
+        return_grids = np.concatenate((diff_grid, informations), axis=0)
+
+        return np.transpose(return_grids)
 
     def get_grid(self):
         excess = len(self.grid[0]) - GRID_DEPTH

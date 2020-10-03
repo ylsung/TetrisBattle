@@ -13,7 +13,7 @@ from TetrisBattle.envs.tetris_interface import TetrisInterface, TetrisDoubleInte
 class TetrisEnv(gym.Env, abc.ABC):
     """Custom Environment that follows gym interface"""
     metadata = {'render.modes': ['human', 'rgb_array'], 
-                'obs_type': ['image', 'grid']}
+                'obs_type': ['image', 'grid', 'diff_grid']}
 
     def __init__(self, interface, gridchoice="none", obs_type="image", mode="rgb_array"):
         super(TetrisEnv, self).__init__()
@@ -45,6 +45,9 @@ class TetrisEnv(gym.Env, abc.ABC):
         elif obs_type == "grid":
             self.observation_space = spaces.Box(low=0, high=1, 
                 shape=list(self.game_interface.get_seen_grid().shape), dtype=np.float32)
+        elif obs_type == "diff_grid":
+            self.observation_space = spaces.Box(low=0, high=1, 
+                shape=list(self.game_interface.get_diff_grid().shape), dtype=np.float32)
 
         self.reset()
 

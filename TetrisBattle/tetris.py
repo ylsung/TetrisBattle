@@ -13,6 +13,7 @@ game with not many changes"
 import os
 import pygame
 import random
+import math
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def put_block_in_grid(grid, block, px, py):
         TODO: y boundary
         '''
         if -1 < x < GRID_WIDTH and -1 < y < len(grid[0]):
-            grid[x][y] = c
+            grid[x][y] = c + 0.7
 
 def collide(grid, block, px, py):
     feasibles = block.get_feasible()
@@ -840,6 +841,7 @@ class Tetris(object):
                 put_block_in_grid(self.grid, self.block, self.px, self.py)
                 # print("fallen")
 
+
                 return True
 
         else:
@@ -888,24 +890,43 @@ class Tetris(object):
 
     def clear(self):
 
-        cleared = 0
+        cleared = 1
 
         # self.tetris = 0
 
         is_combo = 0
 
+        bomb_cleared = 0
+
         for y in reversed(range(GRID_DEPTH)):
             y = -(y + 1)
             row = 0 # starts checking from row zero
+
             for x in range(GRID_WIDTH):
                 if self.grid[x][y] > 0 and self.grid[x][y] < 8:
                     row += 1
+                if self.grid[x][y] >= 9:
+                    if self.grid[x][y - 1] - math.floor(self.grid[x][y - 1]) > 0:
+                        bomb_cleared = 1
+
 
             if row == GRID_WIDTH:
                 cleared += 1
                 for i in range(GRID_WIDTH):
                     del self.grid[i][y] # deletes cleared lines
                     self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
+
+            if bomb_cleared == 1:
+                bomb_cleared = 0
+                cleared += 1
+                for i in range(GRID_WIDTH):
+                    del self.grid[i][y] # deletes cleared lines
+                    self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
+
+        for y in reversed(range(GRID_DEPTH)):
+            y = -(y + 1)
+            for x in range(GRID_WIDTH):
+                self.grid[x][y] =  math.floor(self.grid[x][y])
 
         if cleared >= 1: # for sending lines
             self.sound_manager.play_sound('clear')
@@ -974,7 +995,7 @@ class Tetris(object):
         # excess = len(grid[0]) - GRID_DEPTH
         for y in range(0, len(self.grid[0])):
             for x in range(GRID_WIDTH):
-                if self.grid[x][y] == 8:
+                if self.grid[x][y] == 8 or self.grid[x][y] == 9:
                     garbage += 1
                     self.grid[x].pop(y)
                     self.grid[x] = [0] + self.grid[x]
@@ -982,9 +1003,14 @@ class Tetris(object):
     def build_garbage(self, grid, attacked):
         garbage_size = min(attacked, GRID_DEPTH)
         for y in range(0, garbage_size):
+            rand_pos = random.randint(0, GRID_WIDTH - 1)
             for i in range(GRID_WIDTH):
                 # del player.grid[i][y] # deletes top of grid
-                grid[i] = grid[i] + [8] # adds garbage lines at the bottom
+                # adds garbage lines at the bottom
+                if i == rand_pos :
+                    grid[i] = grid[i] + [9] # bomb block
+                else:
+                    grid[i] = grid[i] + [8]
 
         # return grid
 

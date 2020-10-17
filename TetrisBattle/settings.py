@@ -11,14 +11,14 @@ GRID_DEPTH = 20
 BLOCK_LENGTH = 4
 BLOCK_WIDTH = 4
 
-FPS = 1000
+FPS = 60
 
 SCREENWIDTH  = 800
 SCREENHEIGHT = 600
 
 SPEED_UP = 1
 
-MAX_TIME = 130000
+MAX_TIME = 300000
 
 PIECE_SHAPE_NUM = 4
 
@@ -123,7 +123,7 @@ PIECES_DICT = {
     'T': tpieces, 'G': lspieces
 }
 
-PIECE_NUM2TYPE = {1: 'I', 2: 'O', 3: 'J', 4: 'L', 5: 'Z', 6: 'S', 7: 'T', 8: 'G'}
+PIECE_NUM2TYPE = {1: 'I', 2: 'O', 3: 'J', 4: 'L', 5: 'Z', 6: 'S', 7: 'T', 8: 'G', 9: 'B'}
 PIECE_TYPE2NUM = {val: key for key, val in PIECE_NUM2TYPE.items()}
 POSSIBLE_KEYS = ['I', 'O', 'J', 'L', 'Z', 'S', 'T']
 
@@ -229,11 +229,13 @@ def load_imgs():
         os.path.join(ROOT, "assets/tetris blocks/purple block.png"))
     lspiece = pygame.image.load(
         os.path.join(ROOT, "assets/tetris blocks/linessent block.png"))
+    bpiece = pygame.image.load(
+        os.path.join(ROOT, "assets/tetris blocks/bomb block.png"))
 
     piecepics = {
         'I': ipiece, 'O': opiece, 'J': jpiece,
         'L': lpiece, 'Z': zpiece, 'S': spiece,
-        'T': tpiece, 'G': lspiece
+        'T': tpiece, 'G': lspiece, 'B': bpiece,
     }
 
     images_dict["piecepics"] = piecepics

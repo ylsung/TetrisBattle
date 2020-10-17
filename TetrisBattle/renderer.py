@@ -2,6 +2,7 @@ from .settings import *
 from .tetris import collideDown, hardDrop
 import time as t
 import pygame
+import math
 
 class Renderer(object):
 
@@ -308,7 +309,7 @@ class Renderer(object):
     # different self.images["numbers"](vals) draws differnt colour blocks on the self.screen
     def drawBlock(self, sx, sy, x, y, val):
         # self.images["pics"] = [ipiece, opiece, jpiece, lpiece, zpiece, spiece, tpiece, lspiece]
-        self.screen.blit(self.images["piecepics"][PIECE_NUM2TYPE[val]], (sx + x * 18, sy + y * 18))
+        self.screen.blit(self.images["piecepics"][PIECE_NUM2TYPE[math.floor(val)]], (sx + x * 18, sy + y * 18))
 
     def drawByName(self, name, sx, sy):
         self.screen.blit(self.images[name], (sx, sy))

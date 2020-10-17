@@ -805,6 +805,24 @@ class Tetris(object):
             if evt.key == self.player.down:
                 self.pressedDown = False
 
+            if evt.key == pygame.K_a:
+                self.build_chance(self.grid, height=1, holes=2, chance_type='left')
+
+            if evt.key == pygame.K_s:
+                self.build_chance(self.grid, height=1, holes=2, chance_type='right')
+
+            if evt.key == pygame.K_d:
+                self.build_chance(self.grid, height=1, holes=3, chance_type='left')
+
+            if evt.key == pygame.K_f:
+                self.build_chance(self.grid, height=1, holes=3, chance_type='right')
+
+            if evt.key == pygame.K_v:
+                self.build_chance(self.grid, height=1, holes=4, chance_type='left')
+
+            if evt.key == pygame.K_b:
+                self.build_chance(self.grid, height=1, holes=4, chance_type='right')
+
         return 'none'
 
     # move function
@@ -890,7 +908,7 @@ class Tetris(object):
 
     def clear(self):
 
-        cleared = 1
+        cleared = 0
 
         # self.tetris = 0
 
@@ -926,7 +944,7 @@ class Tetris(object):
         for y in reversed(range(GRID_DEPTH)):
             y = -(y + 1)
             for x in range(GRID_WIDTH):
-                self.grid[x][y] =  math.floor(self.grid[x][y])
+                self.grid[x][y] = math.floor(self.grid[x][y])
 
         if cleared >= 1: # for sending lines
             self.sound_manager.play_sound('clear')
@@ -999,6 +1017,23 @@ class Tetris(object):
                     garbage += 1
                     self.grid[x].pop(y)
                     self.grid[x] = [0] + self.grid[x]
+
+    def build_chance(self, grid, height, holes=2, chance_type='random'):
+        for y in range(0, height):
+            hole_pos = []
+            if chance_type == 'random':
+                hole_pos = random.choices(range(1, GRID_WIDTH), k=holes)
+            elif chance_type == 'left':
+                hole_pos = range(0, holes)
+            elif chance_type == 'right':
+                hole_pos = range(GRID_WIDTH - holes, GRID_WIDTH)
+
+            for i in range(GRID_WIDTH):
+                if i not in hole_pos:
+                    grid[i] = grid[i] + [1]
+                else:
+                    grid[i] = grid[i] + [0]
+
 
     def build_garbage(self, grid, attacked):
         garbage_size = min(attacked, GRID_DEPTH)

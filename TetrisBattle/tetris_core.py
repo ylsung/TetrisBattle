@@ -1,4 +1,6 @@
 from .settings import *
+from copy import deepcopy
+import random
 
 class Piece(object):
     def __init__(self, _type, possible_shapes):
@@ -100,6 +102,278 @@ class Buffer(object):
 
         for key in pieces_keys:
             _list.append(Piece(key, PIECES_DICT[key]))
+
+def put_block_in_grid(grid, block, px, py):
+    feasibles = block.return_pos_color(px, py)
+
+    for x, y, c in feasibles:
+        '''
+        TODO: y boundary
+        '''
+        if -1 < x < GRID_WIDTH and -1 < y < len(grid[0]):
+            grid[x][y] = c + 0.7 # tag for last fallen
+
+def collide(grid, block, px, py):
+    feasibles = block.get_feasible()
+
+    # print(px)
+    # print(block)
+    # excess = len(grid[0]) - GRID_DEPTH
+    for pos in feasibles:
+        # print(px + pos[0], py + pos[1])
+        if px + pos[0] > GRID_WIDTH - 1:   # right
+            return True
+
+        if px + pos[0] < 0:   # left
+            return True
+
+        if py + pos[1] > len(grid[0]) - 1:  # down
+            return True
+
+        if py + pos[1] < 0:   # up
+            continue
+
+        if grid[px + pos[0]][py + pos[1]] > 0:
+            # print(px, py)
+            # print(px + pos[0], py + pos[1])
+            # print("Touch")
+            return True
+
+    return False
+
+# collidedown function
+# for i in range 4(y position)
+# if px+y=20 then collidedown =true
+# used for move down and rotation collisions
+def collideDown(grid, block, px, py):
+    return collide(grid, block, px, py + 1)
+
+# collideleft function
+# for i in range 4(x positions)
+# if blockx +x =0 then collide left = True
+# used for moving block and rotation collision
+def collideLeft(grid, block, px, py):
+    return collide(grid, block, px - 1, py)
+
+# collideright function
+# for i in range 4(x positions)
+# if blockx +x +1>9 then collide left = True
+# plus 1 is there cuz pxis on left of the piece
+# used for moving block and rotation collision
+def collideRight(grid, block, px, py):
+    return collide(grid, block, px + 1, py)
+
+# rotatecollision function
+# when respective rotate buttons are pressed
+# this function checks if collide(left right or down has occured)
+# if it hasnt then rotation occurs
+def rotateCollide(grid, block, px, py):
+    feasibles = block.get_feasible()
+
+    left_most = 100
+    right_most = 0
+    up_most = 100
+    down_most = 0
+
+    for pos in feasibles:
+        right_most = max(right_most, pos[0])
+        left_most = min(left_most, pos[0])
+
+        down_most = max(down_most, pos[1])
+        up_most = min(up_most, pos[1])
+
+    c = Counter()
+    # print(px)
+    # print(block)
+    excess = len(grid[0]) - GRID_DEPTH
+    for pos in feasibles:
+        # print(px + pos[0], py + pos[1])
+        if px + pos[0] > 9:   # right
+            c.update({"right": 1})
+
+        if px + pos[0] < 0:   # left
+            c.update({"left": 1})
+
+        if py + pos[1] > len(grid[0]) - 1:  # down
+            c.update({"down": 1})
+
+        # if py + pos[1] < excess:   # up
+        #     c.update({"up": 1})
+
+        if 0 <= px + pos[0] <= 9 and excess <= py + pos[1] <= len(grid[0]) - 1:
+
+            if grid[px + pos[0]][py + pos[1]] > 0:
+                if pos[0] == left_most:
+                    c.update({"left": 1})
+                elif pos[0] == right_most:
+                    c.update({"right": 1})
+                elif pos[1] == down_most:
+                    c.update({"down": 1})
+                # elif pos[1] == up_most:
+                #     c.update({"up": 1})
+
+    # print(c)
+    if len(c) == 0:
+        return False
+    else:
+        return c.most_common()[0][0]
+
+
+#this function checks if a tspin has occured
+#checks all possible tspin positions
+#then spins the t piece into the spot
+def tspinCheck(grid, block, px, py):
+
+    if collideDown(grid, block, px, py) == True:
+        if block.block_type() == 'T':
+            if px + 2 < GRID_WIDTH and py + 3 < len(grid[0]):
+                if grid[px][py + 1] > 0 and grid[px][py + 3] > 0 and grid[px + 2][py + 3] > 0:
+
+                    return True
+                elif grid[px][py + 3] > 0 and grid[px + 2][py + 3] > 0 and grid[px + 2][py + 1] > 0:
+
+                    return True
+    return False
+
+# this function rotates the piece
+# when rotation button is hit the next grid in the piece list becomes the piece
+def rotate(grid, block, px, py, _dir=1):
+    # print(grid)
+
+    block.rotate(_dir)
+
+    # b = block.now_block()
+
+    collision = rotateCollide(grid, block, px, py) # checks for collisions
+    # print(collision)
+    find = 0
+
+    if collision == "left":
+        y_list = [0, 1, -1]
+        for s_x in range(0, 3):
+            for s_y in y_list:
+                if not find and not collide(grid, block, px + s_x, py + s_y):
+                    px += s_x
+                    py += s_y
+                    find = 1
+    elif collision == "right":
+        y_list = [0, 1, -1]
+        for s_x in reversed(range(-2, 0)):
+            for s_y in y_list:
+                if not find and not collide(grid, block, px + s_x, py + s_y):
+                    px += s_x
+                    py += s_y
+                    find = 1
+    elif collision == "down":
+        # y_list = [-1, -2]
+        x_list = [0, -1, 1, -2, 2]
+        for s_y in reversed(range(-1, 0)):
+            for s_x in x_list:
+                if not find and not collide(grid, block, px + s_x, py + s_y):
+                    px += s_x
+                    py += s_y
+                    find = 1
+
+    elif collision == "up":
+        x_list = [0, -1, 1, -2, 2]
+        for s_y in range(1, 2):
+            for s_x in x_list:
+                if not find and not collide(grid, block, px + s_x, py + s_y):
+                    px += s_x
+                    py += s_y
+                    find = 1
+
+    if collision != False and not find:
+        block.rotate(- _dir)
+
+    # print(collision)
+
+    tspin = 0
+    if tspinCheck(grid, block, px, py) == True:
+        tspin = 1
+        print("Tspin rotate")
+
+    # return [block, px, py, tspin]
+
+    return block, px, py, tspin
+
+
+# this function drops the piece as far as it can go until
+# it collides with a piece below it
+def hardDrop(grid, block, px, py):
+    y = 0
+    x = 0
+    if collideDown(grid, block, px, py) == False:
+        x = 1
+    if x == 1:
+        while True:
+            py += 1
+            y += 1
+            if collideDown(grid, block, px, py) == True:
+                break
+
+    return y
+
+# this function enables you to hold a piece
+def hold(block, held, _buffer):
+    # when piece is held the block at pos[0]
+    # in the nextlist becomes the newpiece
+    if held == None:
+        held = block
+        block = _buffer.new_block()
+
+    # the piece switches with the held piece
+    else:
+        block, held = held, block
+
+    return [block, held]
+
+def freeze(last_time):
+    start = t.time()
+    while t.time() - start < last_time:
+        pass
+
+def get_infos(board):
+    # board is equal to grid
+
+    # borrow from https://github.com/scuriosity/machine-learning-tetris/blob/master/tetris.py
+    # This function will calculate different parameters of the current board
+
+    # Initialize some stuff
+    heights = [0] * len(board)
+    diffs = [0] * (len(board) - 1)
+    holes = 0
+    diff_sum = 0
+
+    # Calculate the maximum height of each column
+    for i in range(0, len(board)):  # Select a column
+        for j in range(0, len(board[0])):  # Search down starting from the top of the board
+            if int(board[i][j]) > 0:  # Is the cell occupied?
+                heights[i] = len(board[0]) - j  # Store the height value
+                break
+
+    # Calculate the difference in heights
+    for i in range(0, len(diffs)):
+        diffs[i] = heights[i + 1] - heights[i]
+
+    # Calculate the maximum height
+    max_height = max(heights)
+
+    # Count the number of holes
+    for i in range(0, len(board)):
+        occupied = 0  # Set the 'Occupied' flag to 0 for each new column
+        for j in range(0, len(board[0])):  # Scan from top to bottom
+            if int(board[i][j]) > 0:
+                occupied = 1  # If a block is found, set the 'Occupied' flag to 1
+            if int(board[i][j]) == 0 and occupied == 1:
+                holes += 1  # If a hole is found, add one to the count
+
+    height_sum = sum(heights)
+
+    for i in diffs:
+        diff_sum += abs(i)
+
+    return height_sum, diff_sum, max_height, holes
 
 
 class TetrisCore():
@@ -264,274 +538,154 @@ class TetrisCore():
                     break
         return max_height
 
-    def put_block_in_grid(grid, block, px, py):
-        feasibles = block.return_pos_color(px, py)
+    def reset_pos(self):
+        self.px = 4
+        self.py = -2 + len(self.grid[0]) - GRID_DEPTH
 
-        for x, y, c in feasibles:
-            '''
-            TODO: y boundary
-            '''
-            if -1 < x < GRID_WIDTH and -1 < y < len(grid[0]):
-                grid[x][y] = c + 0.7 # tag for last fallen
+    def natural_down(self):
+        if collideDown(self.grid, self.block, self.px, self.py) == False:
+            # self.stopcounter = 0
+            # self.block.move_down()
+            self.py += 1
+            # pass
 
-    def collide(grid, block, px, py):
-        feasibles = block.get_feasible()
+    def rotate(self, _dir):
+        rotate(self.grid, self.block, self.px, self.py, _dir)
 
-        # print(px)
-        # print(block)
-        # excess = len(grid[0]) - GRID_DEPTH
-        for pos in feasibles:
-            # print(px + pos[0], py + pos[1])
-            if px + pos[0] > GRID_WIDTH - 1:   # right
-                return True
+    def hardDrop(self):
+        hardDrop(self.grid, self.block, self.px, self.py)
 
-            if px + pos[0] < 0:   # left
-                return True
+    def hold(self):
+        if not self.isholded:
 
-            if py + pos[1] > len(grid[0]) - 1:  # down
-                return True
+            self.block, self.held = hold(self.block, self.held, self.buffer) # parameters
+            self.held.reset()
+            self.reset_pos()
+            self.isholded = 1
 
-            if py + pos[1] < 0:   # up
-                continue
-
-            if grid[px + pos[0]][py + pos[1]] > 0:
-                # print(px, py)
-                # print(px + pos[0], py + pos[1])
-                # print("Touch")
-                return True
-
-        return False
-
-    # collidedown function
-    # for i in range 4(y position)
-    # if px+y=20 then collidedown =true
-    # used for move down and rotation collisions
-    def collideDown(grid, block, px, py):
-        return collide(grid, block, px, py + 1)
-
-    # collideleft function
-    # for i in range 4(x positions)
-    # if blockx +x =0 then collide left = True
-    # used for moving block and rotation collision
-    def collideLeft(grid, block, px, py):
-        return collide(grid, block, px - 1, py)
-
-    # collideright function
-    # for i in range 4(x positions)
-    # if blockx +x +1>9 then collide left = True
-    # plus 1 is there cuz pxis on left of the piece
-    # used for moving block and rotation collision
-    def collideRight(grid, block, px, py):
-        return collide(grid, block, px + 1, py)
-
-    # rotatecollision function
-    # when respective rotate buttons are pressed
-    # this function checks if collide(left right or down has occured)
-    # if it hasnt then rotation occurs
-    def rotateCollide(grid, block, px, py):
-        feasibles = block.get_feasible()
-
-        left_most = 100
-        right_most = 0
-        up_most = 100
-        down_most = 0
-
-        for pos in feasibles:
-            right_most = max(right_most, pos[0])
-            left_most = min(left_most, pos[0])
-
-            down_most = max(down_most, pos[1])
-            up_most = min(up_most, pos[1])
-
-        c = Counter()
-        # print(px)
-        # print(block)
-        excess = len(grid[0]) - GRID_DEPTH
-        for pos in feasibles:
-            # print(px + pos[0], py + pos[1])
-            if px + pos[0] > 9:   # right
-                c.update({"right": 1})
-
-            if px + pos[0] < 0:   # left
-                c.update({"left": 1})
-
-            if py + pos[1] > len(grid[0]) - 1:  # down
-                c.update({"down": 1})
-
-            # if py + pos[1] < excess:   # up
-            #     c.update({"up": 1})
-
-            if 0 <= px + pos[0] <= 9 and excess <= py + pos[1] <= len(grid[0]) - 1:
-
-                if grid[px + pos[0]][py + pos[1]] > 0:
-                    if pos[0] == left_most:
-                        c.update({"left": 1})
-                    elif pos[0] == right_most:
-                        c.update({"right": 1})
-                    elif pos[1] == down_most:
-                        c.update({"down": 1})
-                    # elif pos[1] == up_most:
-                    #     c.update({"up": 1})
-
-        # print(c)
-        if len(c) == 0:
+            return True
+        else:
             return False
+
+    def build_chance(self, height, holes=2, chance_type='random'):
+        for y in range(0, height):
+            hole_pos = []
+            if chance_type == 'random':
+                hole_pos = random.choices(range(1, GRID_WIDTH), k=holes)
+            elif chance_type == 'left':
+                hole_pos = range(0, holes)
+            elif chance_type == 'right':
+                hole_pos = range(GRID_WIDTH - holes, GRID_WIDTH)
+
+            for i in range(GRID_WIDTH):
+                if i not in hole_pos:
+                    self.grid[i] = self.grid[i] + [1]
+                else:
+                    self.grid[i] = self.grid[i] + [0]
+
+    def move_right(self):
+        if collideRight(self.grid, self.block, self.px, self.py) == False:
+            self.px += 1
+
+            return True
         else:
-            return c.most_common()[0][0]
+            return False
 
+    def move_right(self):
+        if collideLeft(self.grid, self.block, self.px, self.py) == False:
+            self.px -= 1
 
-    #this function checks if a tspin has occured
-    #checks all possible tspin positions
-    #then spins the t piece into the spot
-    def tspinCheck(grid, block, px, py):
-
-        if collideDown(grid, block, px, py) == True:
-            if block.block_type() == 'T':
-                if px + 2 < GRID_WIDTH and py + 3 < len(grid[0]):
-                    if grid[px][py + 1] > 0 and grid[px][py + 3] > 0 and grid[px + 2][py + 3] > 0:
-
-                        return True
-                    elif grid[px][py + 3] > 0 and grid[px + 2][py + 3] > 0 and grid[px + 2][py + 1] > 0:
-
-                        return True
-        return False
-
-    # this function rotates the piece
-    # when rotation button is hit the next grid in the piece list becomes the piece
-    def rotate(grid, block, px, py, _dir=1):
-        # print(grid)
-
-        block.rotate(_dir)
-
-        # b = block.now_block()
-
-        collision = rotateCollide(grid, block, px, py) # checks for collisions
-        # print(collision)
-        find = 0
-
-        if collision == "left":
-            y_list = [0, 1, -1]
-            for s_x in range(0, 3):
-                for s_y in y_list:
-                    if not find and not collide(grid, block, px + s_x, py + s_y):
-                        px += s_x
-                        py += s_y
-                        find = 1
-        elif collision == "right":
-            y_list = [0, 1, -1]
-            for s_x in reversed(range(-2, 0)):
-                for s_y in y_list:
-                    if not find and not collide(grid, block, px + s_x, py + s_y):
-                        px += s_x
-                        py += s_y
-                        find = 1
-        elif collision == "down":
-            # y_list = [-1, -2]
-            x_list = [0, -1, 1, -2, 2]
-            for s_y in reversed(range(-1, 0)):
-                for s_x in x_list:
-                    if not find and not collide(grid, block, px + s_x, py + s_y):
-                        px += s_x
-                        py += s_y
-                        find = 1
-
-        elif collision == "up":
-            x_list = [0, -1, 1, -2, 2]
-            for s_y in range(1, 2):
-                for s_x in x_list:
-                    if not find and not collide(grid, block, px + s_x, py + s_y):
-                        px += s_x
-                        py += s_y
-                        find = 1
-
-        if collision != False and not find:
-            block.rotate(- _dir)
-
-        # print(collision)
-
-        tspin = 0
-        if tspinCheck(grid, block, px, py) == True:
-            tspin = 1
-            print("Tspin rotate")
-
-        # return [block, px, py, tspin]
-
-        return block, px, py, tspin
-
-
-    # this function drops the piece as far as it can go until
-    # it collides with a piece below it
-    def hardDrop(grid, block, px, py):
-        y = 0
-        x = 0
-        if collideDown(grid, block, px, py) == False:
-            x = 1
-        if x == 1:
-            while True:
-                py += 1
-                y += 1
-                if collideDown(grid, block, px, py) == True:
-                    break
-
-        return y
-
-    # this function enables you to hold a piece
-    def hold(block, held, _buffer):
-        # when piece is held the block at pos[0]
-        # in the nextlist becomes the newpiece
-        if held == None:
-            held = block
-            block = _buffer.new_block()
-
-        # the piece switches with the held piece
+            return True
         else:
-            block, held = held, block
+            return False
 
-        return [block, held]
+    def move_down(self):
+        if collideDown(self.grid, self.block, self.px, self.py) == False:
+            self.py += 1
 
-    def freeze(last_time):
-        start = t.time()
-        while t.time() - start < last_time:
-            pass
+            return True
+        else:
+            return False
 
-    def get_infos(board):
-        # board is equal to grid
+    def collideDown(self):
+        return collideDown(self.grid, self.block, self.px, self.py)
 
-        # borrow from https://github.com/scuriosity/machine-learning-tetris/blob/master/tetris.py
-        # This function will calculate different parameters of the current board
+    def put_block_in_grid(self):
+        put_block_in_grid(self.grid, self.block, self.px, self.py)
 
-        # Initialize some stuff
-        heights = [0] * len(board)
-        diffs = [0] * (len(board) - 1)
-        holes = 0
-        diff_sum = 0
+    def get_cleared(self):
+        bomb_cleared = 0
+        cleared = 0
 
-        # Calculate the maximum height of each column
-        for i in range(0, len(board)):  # Select a column
-            for j in range(0, len(board[0])):  # Search down starting from the top of the board
-                if int(board[i][j]) > 0:  # Is the cell occupied?
-                    heights[i] = len(board[0]) - j  # Store the height value
-                    break
+        for y in reversed(range(GRID_DEPTH)):
+            y = -(y + 1)
+            row = 0 # starts checking from row zero
 
-        # Calculate the difference in heights
-        for i in range(0, len(diffs)):
-            diffs[i] = heights[i + 1] - heights[i]
+            for x in range(GRID_WIDTH):
+                if self.grid[x][y] > 0 and self.grid[x][y] < 8:
+                    row += 1
+                if self.grid[x][y] >= 9:
+                    if self.grid[x][y - 1] - math.floor(self.grid[x][y - 1]) > 0:
+                        bomb_cleared = 1
 
-        # Calculate the maximum height
-        max_height = max(heights)
 
-        # Count the number of holes
-        for i in range(0, len(board)):
-            occupied = 0  # Set the 'Occupied' flag to 0 for each new column
-            for j in range(0, len(board[0])):  # Scan from top to bottom
-                if int(board[i][j]) > 0:
-                    occupied = 1  # If a block is found, set the 'Occupied' flag to 1
-                if int(board[i][j]) == 0 and occupied == 1:
-                    holes += 1  # If a hole is found, add one to the count
+            if row == GRID_WIDTH:
+                cleared += 1
+                for i in range(GRID_WIDTH):
+                    del self.grid[i][y] # deletes cleared lines
+                    self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
 
-        height_sum = sum(heights)
+            if bomb_cleared == 1:
+                bomb_cleared = 0
+                cleared += 1
+                for i in range(GRID_WIDTH):
+                    del self.grid[i][y] # deletes cleared lines
+                    self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
 
-        for i in diffs:
-            diff_sum += abs(i)
+        for y in reversed(range(GRID_DEPTH)):
+            y = -(y + 1)
+            for x in range(GRID_WIDTH):
+                self.grid[x][y] = math.floor(self.grid[x][y])
 
-        return height_sum, diff_sum, max_height, holes
+        return cleared, bomb_cleared
+
+    def check_KO(self):
+        is_ko = False
+        #if your grid hits the top ko = true
+        excess = len(self.grid[0]) - GRID_DEPTH
+
+        for i in range(GRID_WIDTH):
+            if self.grid[i][excess] > 0:
+                is_ko = True
+                break
+
+        return is_ko
+
+    def clear_garbage(self):
+        garbage = 0
+        # excess = len(grid[0]) - GRID_DEPTH
+        for y in range(0, len(self.grid[0])):
+            for x in range(GRID_WIDTH):
+                if self.grid[x][y] == 8 or self.grid[x][y] == 9:
+                    garbage += 1
+                    self.grid[x].pop(y)
+                    self.grid[x] = [0] + self.grid[x]
+
+    def build_garbage(self, attacked):
+        garbage_size = min(attacked, GRID_DEPTH)
+        for y in range(0, garbage_size):
+            rand_pos = random.randint(0, GRID_WIDTH - 1)
+            for i in range(GRID_WIDTH):
+                # del player.grid[i][y] # deletes top of grid
+                # adds garbage lines at the bottom
+                if i == rand_pos :
+                    self.grid[i] = self.grid[i] + [9] # bomb block
+                else:
+                    self.grid[i] = self.grid[i] + [8]
+
+        # return grid
+
+    def new_block(self):
+        self.block = self.buffer.new_block()
+        self.reset_pos()
+        self.isholded = 0

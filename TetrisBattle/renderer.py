@@ -1,5 +1,5 @@
 from .settings import *
-from .tetris import collideDown, hardDrop
+from .tetris_core import collideDown, hardDrop
 import time as t
 import pygame
 import math

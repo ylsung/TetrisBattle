@@ -165,6 +165,30 @@ class Tetris(object):
 
         self.reset()
 
+    @property
+    def grid(self):
+        return self.core.grid
+
+    @property
+    def held(self):
+        return self.core.held
+
+    @property
+    def buffer(self):
+        return self.core.buffer
+
+    @property
+    def block(self):
+        return self.core.block
+
+    @property
+    def px(self):
+        return self.core.px
+
+    @property
+    def py(self):
+        return self.core.py
+
     def reset(self):
         # self.grid = deepcopy(self.o_grid)
 
@@ -388,7 +412,7 @@ class Tetris(object):
             #     self.py += 1
             #     # pass
 
-            # self.LAST_NATRUAL_FALL_TIME = 0
+            self.LAST_NATRUAL_FALL_TIME = 0
         # else:
         #     self.natural_down_counter += 1
 
@@ -482,7 +506,9 @@ class Tetris(object):
     def move(self):
         # if keys[self.right]:
         if self.pressedRight and self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
-            self.core.move_right()
+            if self.core.move_right():
+                self.LAST_MOVE_SHIFT_TIME = 0
+
             # if collideRight(self.grid, self.block, self.px, self.py) == False:
             #     self.LAST_MOVE_SHIFT_TIME = 0
 
@@ -490,7 +516,9 @@ class Tetris(object):
             #     self.px += 1
 
         if self.pressedLeft and self.LAST_MOVE_SHIFT_TIME > MOVE_SHIFT_FREQ:
-            self.core.move_left()
+            if self.core.move_left():
+                self.LAST_MOVE_SHIFT_TIME = 0
+
             # if collideLeft(self.grid, self.block, self.px, self.py) == False:
             #     self.LAST_MOVE_SHIFT_TIME = 0
 
@@ -498,7 +526,9 @@ class Tetris(object):
             #     self.px -= 1
 
         if self.pressedDown and self.LAST_MOVE_DOWN_TIME > MOVE_DOWN_FREQ:
-            self.core.move_down()
+            if self.core.move_down():
+                self.LAST_MOVE_DOWN_TIME = 0
+
             # if collideDown(self.grid, self.block, self.px, self.py) == False:
             #     self.LAST_MOVE_DOWN_TIME = 0
             #     # self.stopcounter = 0

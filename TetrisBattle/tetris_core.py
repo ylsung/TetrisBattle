@@ -1,6 +1,9 @@
 from .settings import *
 from copy import deepcopy
 import random
+import math
+import numpy as np
+from collections import Counter
 
 class Piece(object):
     def __init__(self, _type, possible_shapes):
@@ -328,10 +331,6 @@ def hold(block, held, _buffer):
 
     return [block, held]
 
-def freeze(last_time):
-    start = t.time()
-    while t.time() - start < last_time:
-        pass
 
 def get_infos(board):
     # board is equal to grid
@@ -375,6 +374,39 @@ def get_infos(board):
 
     return height_sum, diff_sum, max_height, holes
 
+
+'''
+
+class Judge
+
+'''
+
+class Judge(object):
+
+    @staticmethod
+    def check_ko_win(tetris, max_ko):
+        if tetris.KO >= max_ko:
+            return 1
+
+        return 0
+
+    @staticmethod
+    def who_win(tetris_1, tetris_2):
+        if tetris_2.KO > tetris_1.KO: # Checks who is the winner of the game
+            return tetris_2.get_id() # a is screebn.copy,endgame ends the game,2 is player 2 wins
+        if tetris_1.KO > tetris_2.KO:
+            return tetris_1.get_id() # a is screebn.copy,endgame ends the game,1 is player 1 wins
+        if tetris_1.KO == tetris_2.KO:
+            if tetris_2.sent > tetris_1.sent:
+                return tetris_2.get_id() # a is screebn.copy,endgame ends the game,2 is player 2 wins
+            elif tetris_1.sent > tetris_2.sent:
+                return tetris_1.get_id() # a is screebn.copy,endgame ends the game,1 is player 1 wins
+            elif tetris_1.get_maximum_height() > tetris_2.get_maximum_height():
+                return tetris_2.get_id()
+            elif tetris_2.get_maximum_height() > tetris_1.get_maximum_height():
+                return tetris_1.get_id()
+            else:
+                return tetris_1.get_id() # no UI of draw
 
 class TetrisCore():
     def __init__(self, gridchoice='none'):
@@ -498,10 +530,10 @@ class TetrisCore():
             informations[PIECE_TYPE2NUM[_type] - 1][i + 1] = 1
         # index start from 6
 
-        informations[0][6] = self.sent / 100
-        informations[1][6] = self.combo / 10
-        informations[2][6] = self.pre_back2back
-        informations[3][6] = self._attacked / GRID_DEPTH
+        # informations[0][6] = self.sent / 100
+        # informations[1][6] = self.combo / 10
+        # informations[2][6] = self.pre_back2back
+        # informations[3][6] = self._attacked / GRID_DEPTH
         # informations[3][7] = self.time / MAX_TIME
 
         return_grids = np.concatenate((return_grids, informations), axis=0)
@@ -550,10 +582,12 @@ class TetrisCore():
             # pass
 
     def rotate(self, _dir):
-        rotate(self.grid, self.block, self.px, self.py, _dir)
+        self.block, self.px, self.py, tspin = rotate(self.grid, self.block, self.px, self.py, _dir)
+        return tspin
 
     def hardDrop(self):
-        hardDrop(self.grid, self.block, self.px, self.py)
+        y = hardDrop(self.grid, self.block, self.px, self.py)
+        self.py += y
 
     def hold(self):
         if not self.isholded:
@@ -591,7 +625,7 @@ class TetrisCore():
         else:
             return False
 
-    def move_right(self):
+    def move_left(self):
         if collideLeft(self.grid, self.block, self.px, self.py) == False:
             self.px -= 1
 

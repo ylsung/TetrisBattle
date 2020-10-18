@@ -7,10 +7,10 @@ import time as t
 from TetrisBattle.renderer import Renderer
 from TetrisBattle.sound_manager import SoundManager
 
-from TetrisBattle.tetris import Tetris, Player, Judge
+from TetrisBattle.tetris import Tetris, Player, freeze
 
 from TetrisBattle.tetris_core import collideDown, collide, collideLeft, collideRight, \
-    hardDrop, freeze, get_infos
+    hardDrop, get_infos, Judge
 
 POS_LIST = [
     {

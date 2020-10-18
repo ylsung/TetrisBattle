@@ -80,38 +80,11 @@ class Player(object):
     def right(self):
         return self._right
 
-'''
 
-class Judge
-
-'''
-
-class Judge(object):
-
-    @staticmethod
-    def check_ko_win(tetris, max_ko):
-        if tetris.KO >= max_ko:
-            return 1
-
-        return 0
-
-    @staticmethod
-    def who_win(tetris_1, tetris_2):
-        if tetris_2.KO > tetris_1.KO: # Checks who is the winner of the game
-            return tetris_2.get_id() # a is screebn.copy,endgame ends the game,2 is player 2 wins
-        if tetris_1.KO > tetris_2.KO:
-            return tetris_1.get_id() # a is screebn.copy,endgame ends the game,1 is player 1 wins
-        if tetris_1.KO == tetris_2.KO:
-            if tetris_2.sent > tetris_1.sent:
-                return tetris_2.get_id() # a is screebn.copy,endgame ends the game,2 is player 2 wins
-            elif tetris_1.sent > tetris_2.sent:
-                return tetris_1.get_id() # a is screebn.copy,endgame ends the game,1 is player 1 wins
-            elif tetris_1.get_maximum_height() > tetris_2.get_maximum_height():
-                return tetris_2.get_id()
-            elif tetris_2.get_maximum_height() > tetris_1.get_maximum_height():
-                return tetris_1.get_id()
-            else:
-                return tetris_1.get_id() # no UI of draw
+def freeze(last_time):
+    start = t.time()
+    while t.time() - start < last_time:
+        pass
 
 class Tetris(object):
     def __init__(self, player, gridchoice, training=False):
@@ -422,13 +395,13 @@ class Tetris(object):
         if evt.type == pygame.KEYDOWN:
             if evt.key == self.player.rotate_right and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 # self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=1)
-                self.core.rotate(_dir=1)
+                self.tspin = self.core.rotate(_dir=1)
                 self.LAST_ROTATE_TIME = 0
                 self.sound_manager.play_sound('rotate')
 
             if evt.key == self.player.rotate_left and self.LAST_ROTATE_TIME >= ROTATE_FREQ: # rotating
                 # self.block, self.px, self.py, self.tspin = rotate(self.grid, self.block, self.px, self.py, _dir=-1)
-                self.core.rotate(_dir=-1)
+                self.tspin = self.core.rotate(_dir=-1)
                 self.LAST_ROTATE_TIME = 0
                 self.sound_manager.play_sound('rotate')
 
@@ -595,45 +568,7 @@ class Tetris(object):
 
     def clear(self):
 
-        cleared = 0
-
-        # self.tetris = 0
-
-        is_combo = 0
-
-        bomb_cleared = 0
-
-        cleared, bomb_cleared = self.core.get_clear()
-
-        # for y in reversed(range(GRID_DEPTH)):
-        #     y = -(y + 1)
-        #     row = 0 # starts checking from row zero
-
-        #     for x in range(GRID_WIDTH):
-        #         if self.grid[x][y] > 0 and self.grid[x][y] < 8:
-        #             row += 1
-        #         if self.grid[x][y] >= 9:
-        #             if self.grid[x][y - 1] - math.floor(self.grid[x][y - 1]) > 0:
-        #                 bomb_cleared = 1
-
-
-        #     if row == GRID_WIDTH:
-        #         cleared += 1
-        #         for i in range(GRID_WIDTH):
-        #             del self.grid[i][y] # deletes cleared lines
-        #             self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
-
-        #     if bomb_cleared == 1:
-        #         bomb_cleared = 0
-        #         cleared += 1
-        #         for i in range(GRID_WIDTH):
-        #             del self.grid[i][y] # deletes cleared lines
-        #             self.grid[i] = [0] + self.grid[i] # adds a row of zeros to the grid
-
-        # for y in reversed(range(GRID_DEPTH)):
-        #     y = -(y + 1)
-        #     for x in range(GRID_WIDTH):
-        #         self.grid[x][y] = math.floor(self.grid[x][y])
+        cleared, bomb_cleared = self.core.get_cleared()
 
         if cleared >= 1: # for sending lines
             self.sound_manager.play_sound('clear')
@@ -671,8 +606,6 @@ class Tetris(object):
                 self.now_back2back = 1
             else:
                 self.now_back2back = 0
-        # print(self.pre_back2back, self.now_back2back)
-        # self.tspin = 0
 
         self.cleared = cleared
         self.sent += scores
@@ -687,16 +620,6 @@ class Tetris(object):
 
     def check_KO(self):
         return self.core.check_KO()
-        # is_ko = False
-        # #if your grid hits the top ko = true
-        # excess = len(self.grid[0]) - GRID_DEPTH
-
-        # for i in range(GRID_WIDTH):
-        #     if self.grid[i][excess] > 0:
-        #         is_ko = True
-        #         break
-
-        # return is_ko
 
     def clear_garbage(self):
         self.core.clear_garbage
@@ -712,7 +635,7 @@ class Tetris(object):
     # def build_chance(self, grid, height, holes=2, chance_type='random'):
     #     for y in range(0, height):
     #         hole_pos = []
-    #         if chance_type == 'random':
+    #         if chance_type  == 'random':
     #             hole_pos = random.choices(range(1, GRID_WIDTH), k=holes)
     #         elif chance_type == 'left':
     #             hole_pos = range(0, holes)

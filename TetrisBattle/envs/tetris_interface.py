@@ -340,6 +340,7 @@ class TetrisSingleInterface(TetrisInterface):
     def __init__(self, gridchoice="none", obs_type="image", mode="rgb_array"):
         super(TetrisSingleInterface, self).__init__(gridchoice, obs_type, mode)
         self.num_players = 1
+        self.mode = mode
 
         # The second player is dummy, it is used for
         # self.renderer.drawByName("transparent", *opponent["pos"]["transparent"]) at around line 339
@@ -435,19 +436,22 @@ class TetrisSingleInterface(TetrisInterface):
             # scores += cleared_scores
             # scores += tetris.cleared
 
-            self.renderer.drawCombo(tetris, pos["combo"][0], pos["combo"][1])
+            if self.mode == 'human':
+                self.renderer.drawCombo(tetris, pos["combo"][0], pos["combo"][1])
 
-            self.renderer.drawTetris(tetris, pos["tetris"][0], pos["tetris"][1])
-            self.renderer.drawTspin(tetris, pos["tspin"][0], pos["tspin"][1])
-            self.renderer.drawBack2Back(tetris, pos["back2back"][0], pos["back2back"][1])
+                self.renderer.drawTetris(tetris, pos["tetris"][0], pos["tetris"][1])
+                self.renderer.drawTspin(tetris, pos["tspin"][0], pos["tspin"][1])
+                self.renderer.drawBack2Back(tetris, pos["back2back"][0], pos["back2back"][1])
 
             if tetris.check_KO():
-                self.renderer.drawBoard(tetris, pos["board"][0], pos["board"][1])
+                if self.mode == 'human':
+                    self.renderer.drawBoard(tetris, pos["board"][0], pos["board"][1])
 
                 tetris.clear_garbage()
 
-                self.renderer.drawByName("ko", pos["ko"][0], pos["ko"][1])
-                self.renderer.drawByName("transparent", pos["transparent"][0], pos["transparent"][1])
+                if self.mode == 'human':
+                    self.renderer.drawByName("ko", pos["ko"][0], pos["ko"][1])
+                    self.renderer.drawByName("transparent", pos["transparent"][0], pos["transparent"][1])
 
                 # screen.blit(kos[tetris_2.get_KO() - 1], (426, 235))
                 pygame.display.flip()
@@ -459,7 +463,8 @@ class TetrisSingleInterface(TetrisInterface):
 
             tetris.new_block()
 
-        self.renderer.drawGameScreen(tetris)
+        if self.mode == 'human':
+            self.renderer.drawGameScreen(tetris)
 
         tetris.increment_timer()
 
@@ -475,11 +480,13 @@ class TetrisSingleInterface(TetrisInterface):
         #         pygame.draw.rect(self.screen, (255, 0, 0), pos_attack_alarm)
 
         if tetris.KO > 0:
-            self.renderer.drawKO(tetris.KO, pos["big_ko"][0], pos["big_ko"][1])
+            if self.mode == 'human':
+                self.renderer.drawKO(tetris.KO, pos["big_ko"][0], pos["big_ko"][1])
 
-        self.renderer.drawScreen(tetris, pos["drawscreen"][0], pos["drawscreen"][1])
+        if self.mode == 'human':
+            self.renderer.drawScreen(tetris, pos["drawscreen"][0], pos["drawscreen"][1])
 
-        self.renderer.drawByName("transparent", *opponent["pos"]["transparent"])
+            self.renderer.drawByName("transparent", *opponent["pos"]["transparent"])
 
         self.time = self.update_time(self.time)
 
@@ -487,7 +494,8 @@ class TetrisSingleInterface(TetrisInterface):
             reward_notdie = 0.3 * self.total_reward
             end = 1
 
-        self.renderer.drawTime2p(self.time)
+        if self.mode == 'human':
+            self.renderer.drawTime2p(self.time)
 
         # time goes until it hits zero
         # when it hits zero return endgame screen

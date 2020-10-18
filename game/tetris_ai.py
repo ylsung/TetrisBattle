@@ -1,0 +1,24 @@
+from ..TetrisBattle.envs.tetris_env import TetrisSingleEnv
+
+
+class TetrisAI():
+    def __init__(self, gridchoice):
+
+        self.env = TetrisSingleEnv(gridchoice="none", obs_type="grid", mode="rgb_array")
+
+    ob = env.reset()
+
+    for i in range(200000):
+
+        env.take_turns() # take_turn() only work in double mode
+        action = env.random_action()
+
+        ob, reward, done, infos = env.step(action)
+
+        print(reward)
+
+        if len(infos) != 0:
+            print(infos)
+
+        if done:
+            ob = env.reset()

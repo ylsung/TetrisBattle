@@ -410,7 +410,8 @@ class Judge(object):
 
 class TetrisCore():
     def __init__(self, gridchoice='none'):
-        if gridchoice == "none":
+        self.gridchoice = gridchoice
+        if gridchoice == "none" or gridchoice == "random":
             self.o_grid = [[0] * GRID_DEPTH for i in range(GRID_WIDTH)]
 
         if gridchoice == "classic":
@@ -451,6 +452,8 @@ class TetrisCore():
 
     def reset(self):
         self.grid = deepcopy(self.o_grid)
+        if self.gridchoice == 'random':
+            self.build_chance(height=random.randint(1,4), holes=random.randint(1,4), chance_type=random.choice(['random']))
 
         self.buffer = Buffer()
         # list of the held piece
@@ -472,7 +475,7 @@ class TetrisCore():
         b = block.now_block()
 
         for i in range(len(self.grid)):
-            return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+            return_grids[i] = np.array(self.grid[i][excess:], dtype=np.float32)
         return_grids[return_grids > 0] = 1
 
         diff_grid = np.zeros(shape=(GRID_WIDTH), dtype=np.float32)
@@ -505,7 +508,7 @@ class TetrisCore():
         b = block.now_block()
 
         for i in range(len(self.grid)):
-            return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+            return_grids[i] = np.array(self.grid[i][excess:], dtype=np.float32)
         return_grids[return_grids > 0] = 1
 
         add_y = hardDrop(self.grid, self.block, self.px, self.py)
@@ -550,7 +553,7 @@ class TetrisCore():
         # b = block.now_block()
 
         for i in range(len(self.grid)):
-            return_grids[i] = np.array(self.grid[i][excess:GRID_DEPTH], dtype=np.float32)
+            return_grids[i] = np.array(self.grid[i][excess:], dtype=np.float32)
         return_grids[return_grids > 0] = 1
         # for x in range(BLOCK_WIDTH):
         #     for y in range(BLOCK_LENGTH):
@@ -605,7 +608,11 @@ class TetrisCore():
         for y in range(0, height):
             hole_pos = []
             if chance_type == 'random':
-                hole_pos = random.choices(range(1, GRID_WIDTH), k=holes)
+                candidate_pos = list(range(1, GRID_WIDTH))
+                
+                for i in range(holes):
+                    hole_pos.append(candidate_pos.pop(random.randint(0, len(candidate_pos) - 1)))
+                # hole_pos = random.choice(range(1, GRID_WIDTH))
             elif chance_type == 'left':
                 hole_pos = range(0, holes)
             elif chance_type == 'right':

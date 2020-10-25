@@ -122,6 +122,7 @@ class TetrisInterface(abc.ABC):
         self._mode = mode
 
         self.time = MAX_TIME
+        self.last_fallen_time = MAX_TIME
 
         self._action_meaning = {
             0: "NOOP",
@@ -183,7 +184,7 @@ class TetrisInterface(abc.ABC):
 
     def init_ob_memory(self):
         if self._obs_type == "grid":
-            grid_1 = np.zeros(GRID_DEPTH * GRID_WIDTH)
+            grid_1 = np.zeros(GRID_DEPTH * (GRID_WIDTH + 8))
             grid_1.fill(0)
 
             self.ob_memory.append(grid_1)
@@ -204,7 +205,7 @@ class TetrisInterface(abc.ABC):
         # return self.tetris_list[self.now_player]["tetris"].get_grid().reshape(GRID_DEPTH, GRID_WIDTH, 1)
 
     def get_seen_grid(self):
-        self.ob_memory.pop()
+        self.ob_memory.pop(0)
 
         grid_1 = self._get_seen_grid()
         self.ob_memory.append(grid_1)
@@ -287,6 +288,7 @@ class TetrisInterface(abc.ABC):
         # Reset the state of the environment to an initial state
 
         self.time = MAX_TIME
+        self.last_fallen_time = MAX_TIME
         self.now_player = random.randint(0, self.num_players - 1)
         self.total_reward = 0
         self.curr_repeat_time = 0 # denote the current repeat times
@@ -295,6 +297,7 @@ class TetrisInterface(abc.ABC):
                            'max_height': 0,
                            'holes': 0,
                            'n_used_block': 0}
+        self.n_used_block = 0
 
         for i, player in enumerate(self.tetris_list):
             if i + 1 > self.num_players:
@@ -364,20 +367,24 @@ class TetrisSingleInterface(TetrisInterface):
         self.reset()
 
     def reward_func(self, infos):
-
         if infos['is_fallen']:
             basic_reward = 0 # infos['scores']
-            # additional_reward = 0.01 if infos['holes'] == 0 else 0
+            additional_reward = 10 * infos['cleared'] 
+            panelty = 1.0 * infos['holes'] + 1.0 * infos['max_height'] + 0.25 * infos['height_sum'] + 0.25 * infos['diff_sum']
+            
+            return max(basic_reward + additional_reward - panelty, infos['n_used_block'] * 0.01)
+        return 0.0
+        #if infos['is_fallen']:
+        #    basic_reward = infos['scores']
+        #    # additional_reward = 0.01 if infos['holes'] == 0 else 0
 
-            additional_reward = -1 * infos['max_height'] + 10 * infos['cleared'] - 0.5 * infos['holes'] - 0.1 * infos['diff_sum']
-            # additional_reward = 0.76 * infos['cleared'] - 0.1* infos['height_sum']
-            # additional_reward = infos['cleared'] # + (0.2 if infos['holes'] == 0 else 0)
-            # return basic_reward + 0.01 * additional_reward - infos['penalty']
-            return basic_reward + 1 * additional_reward + infos['reward_notdie']
+        #    additional_reward = -1 * infos['max_height'] + 10 * infos['cleared'] - 0.5 * infos['holes'] - 0.1 * infos['diff_sum']
+        #    # additional_reward = 0.76 * infos['cleared'] - 0.1* infos['height_sum']
+        #    # additional_reward = infos['cleared'] # + (0.2 if infos['holes'] == 0 else 0)
+        #    # return basic_reward + 0.01 * additional_reward - infos['penalty']
+        #    return basic_reward + 1 * additional_reward + infos['reward_notdie']
 
-        return 0
-
-
+        #return 0
     def act(self, action):
         # Execute one time step within the environment
 
@@ -464,6 +471,8 @@ class TetrisSingleInterface(TetrisInterface):
         infos = {'is_fallen': self.is_fallen}
 
         if self.is_fallen:
+            self.n_used_block = self.n_used_block + 1
+
             height_sum, diff_sum, max_height, holes = get_infos(tetris.get_board())
 
             # store the different of each information due to the move
@@ -477,13 +486,23 @@ class TetrisSingleInterface(TetrisInterface):
             infos['penalty'] =  penalty_die
             infos['reward_notdie'] = reward_notdie
 
+            infos['n_used_block'] = self.n_used_block
+
             self.last_infos = {'height_sum': height_sum,
                                'diff_sum': diff_sum,
                                'max_height': max_height,
                                'holes': holes,
                                }
+            
+            self.last_fallen_time = self.time
 
+            if holes > 2:
+                # print("Too bad, end early!")
+                end = 1
 
+        if self.last_fallen_time - self.time > 2500:
+            end = 1
+            # print("Too slow, end early!")
             # print(infos)
 
         reward = self.reward_func(infos)

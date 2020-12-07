@@ -8,9 +8,7 @@ from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy
 from stable_baselines import DQN
 from stable_baselines.common import make_vec_env
 from stable_baselines.common.callbacks import BaseCallback
-from stable_baselines import results_plotter
 from stable_baselines.bench import Monitor
-from stable_baselines.results_plotter import load_results, ts2xy
 from stable_baselines.common.noise import AdaptiveParamNoiseSpec
 import os
 

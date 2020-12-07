@@ -1,9 +1,12 @@
 from TetrisBattle.envs.tetris_env import TetrisSingleEnv
+import time
+import numpy as np
 
+np.set_printoptions(precision=1)
 
 if __name__ == "__main__":
 
-    env = TetrisSingleEnv(gridchoice="none", obs_type="grid", mode="human")
+    env = TetrisSingleEnv(gridchoice="comboking", obs_type="grid", mode="rgb_array")
 
     ob = env.reset()
 
@@ -14,10 +17,11 @@ if __name__ == "__main__":
 
         ob, reward, done, infos = env.step(action)
 
-        print(reward)
-
-        if len(infos) != 0:
-            print(infos)
+        # print(reward)
+        print(np.array(ob[200:]).reshape(-1, 18)[:20, :10])
+        # if len(infos) != 0:
+            # print(infos)
+        time.sleep(0.33)
 
         if done:
             ob = env.reset()

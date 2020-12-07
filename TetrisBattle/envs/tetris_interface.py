@@ -366,13 +366,25 @@ class TetrisSingleInterface(TetrisInterface):
 
         self.reset()
 
+    def heuristic_reward(self, infos):
+        aggregate_height = infos['height_sum']
+        complete_lines = infos['cleared']
+        holes = infos['holes']
+        bumpiness = infos['diff_sum']
+        return -0.510066 * aggregate_height + 0.760666 * complete_lines + -0.35663 * holes + -0.184483 * bumpiness
+
     def reward_func(self, infos):
         if infos['is_fallen']:
-            basic_reward = 0 # infos['scores']
-            additional_reward = 10 * infos['cleared'] 
-            panelty = 1.0 * infos['holes'] + 1.0 * infos['max_height'] + 0.25 * infos['height_sum'] + 0.25 * infos['diff_sum']
+            # basic_reward = infos['n_used_block'] * 0.001 # + infos['scores']
+            # time_reward = 3 * max(0, min((2500 - infos['wait_time'])/2500, 1))
+            # additional_reward = 10 * infos['cleared']  
+            # panelty = 1.0 * infos['holes'] + 1.0 * infos['max_height'] + 1.0 * infos['height_sum'] + 1.0 * infos['diff_sum']
             
-            return max(basic_reward + additional_reward - panelty, infos['n_used_block'] * 0.01)
+            # hard_drop_bonus = 2 if infos['action'] == 2 else 1 
+
+            # reward = hard_drop_bonus * (basic_reward + additional_reward - panelty + time_reward)
+            # return reward
+            return self.heuristic_reward(infos)
         return 0.0
         #if infos['is_fallen']:
         #    basic_reward = infos['scores']
@@ -487,6 +499,8 @@ class TetrisSingleInterface(TetrisInterface):
             infos['reward_notdie'] = reward_notdie
 
             infos['n_used_block'] = self.n_used_block
+            infos['wait_time'] = self.last_fallen_time - self.time
+            infos['action'] = action
 
             self.last_infos = {'height_sum': height_sum,
                                'diff_sum': diff_sum,
@@ -496,12 +510,12 @@ class TetrisSingleInterface(TetrisInterface):
             
             self.last_fallen_time = self.time
 
-            if holes > 2:
-                # print("Too bad, end early!")
-                end = 1
+            # if holes > 2:
+            #     # print("Too bad, end early!")
+            #     end = 1
 
-        if self.last_fallen_time - self.time > 2500:
-            end = 1
+        # if self.last_fallen_time - self.time > 2500:
+            # end = 1
             # print("Too slow, end early!")
             # print(infos)
 
